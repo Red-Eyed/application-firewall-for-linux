@@ -1,0 +1,14 @@
+Сборка модуля:
+sudo make -C /usr/src/linux-headers-`uname -r` SUBDIRS=$PWD modules 
+
+Вызов функции инициализации модуля:
+sudo insmod *NAME*.ko 
+
+Вызов функции завершения работы модуля:
+sudo rmmod *NAME* 
+
+Просмотр всех загруженых модулей:
+/proc/modules
+
+Просмотр сообщений загруженых модулей:
+/var/log/kern.log
