@@ -1,4 +1,4 @@
-TARGET_MODULE:=simple-module
+TARGET_MODULE:=simple_driver
 
 # If we are running by kernel building system
 ifneq ($(KERNELRELEASE),)
@@ -20,9 +20,9 @@ clean:
 	$(MAKE) -C $(BUILDSYSTEM_DIR) M=$(PWD) clean
 
 load:
-	insmod ./$(TARGET_MODULE).ko
+	insmod $(TARGET_MODULE).ko
 
 unload:
-	rmmod ./$(TARGET_MODULE).ko
+	rmmod $(TARGET_MODULE)
 
 endif
