@@ -1,0 +1,3 @@
+MODULE_LICENSE("GPL v2");
+MODULE_AUTHOR("Orest");
+MODULE_DESCRIPTION("do_something");
