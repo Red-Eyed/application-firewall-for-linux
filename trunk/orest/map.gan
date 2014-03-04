@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?><project name="Untitled Gantt Project" company="" webLink="http://" view-date="2014-02-09" view-index="0" gantt-divider-location="478" resource-divider-location="345" version="2.0" locale="en">
+    <description/>
+    <view zooming-state="default:6" id="gantt-chart">
+        <field id="tpd3" name="Name" width="51" order="0"/>
+        <field id="tpd4" name="Begin date" width="12" order="1"/>
+        <field id="tpd5" name="End date" width="12" order="2"/>
+        <field id="tpd6" name="Duration" width="6" order="3"/>
+        <field id="tpd8" name="Coordinator" width="17" order="4"/>
+    </view>
+    <view id="resource-table">
+        <field id="0" name="Name" width="50" order="0"/>
+        <field id="1" name="Default role" width="49" order="1"/>
+    </view>
+    <!-- -->
+    <calendars>
+        <day-types>
+            <day-type id="0"/>
+            <day-type id="1"/>
+            <calendar id="1" name="default">
+                <default-week sun="1" mon="0" tue="0" wed="0" thu="0" fri="0" sat="1"/>
+                <only-show-weekends value="false"/>
+                <overriden-day-types/>
+                <days/>
+            </calendar>
+        </day-types>
+    </calendars>
+    <tasks empty-milestones="true">
+        <taskproperties>
+            <taskproperty id="tpd0" name="type" type="default" valuetype="icon"/>
+            <taskproperty id="tpd1" name="priority" type="default" valuetype="icon"/>
+            <taskproperty id="tpd2" name="info" type="default" valuetype="icon"/>
+            <taskproperty id="tpd3" name="name" type="default" valuetype="text"/>
+            <taskproperty id="tpd4" name="begindate" type="default" valuetype="date"/>
+            <taskproperty id="tpd5" name="enddate" type="default" valuetype="date"/>
+            <taskproperty id="tpd6" name="duration" type="default" valuetype="int"/>
+            <taskproperty id="tpd7" name="completion" type="default" valuetype="int"/>
+            <taskproperty id="tpd8" name="coordinator" type="default" valuetype="text"/>
+            <taskproperty id="tpd9" name="predecessorsr" type="default" valuetype="text"/>
+        </taskproperties>
+        <task id="1" name="Aplication" color="#8cb6ce" shape="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0" meeting="false" start="2014-02-11" duration="36" complete="31" expand="true">
+            <task id="3" name="Reserch" color="#8cb6ce" meeting="false" start="2014-02-11" duration="14" complete="64" expand="true">
+                <task id="4" name="Reading" color="#8cb6ce" meeting="false" start="2014-02-11" duration="14" complete="64" expand="true">
+                    <depend id="11" type="2" difference="0" hardness="Strong"/>
+                    <depend id="199" type="2" difference="0" hardness="Strong"/>
+                    <depend id="200" type="2" difference="0" hardness="Strong"/>
+                    <depend id="206" type="1" difference="0" hardness="Strong"/>
+                    <depend id="209" type="2" difference="0" hardness="Strong"/>
+                </task>
+                <task id="5" name="Write test code" color="#8cb6ce" meeting="false" start="2014-02-11" duration="14" complete="64" expand="true">
+                    <depend id="11" type="2" difference="0" hardness="Strong"/>
+                    <depend id="199" type="2" difference="0" hardness="Strong"/>
+                    <depend id="200" type="2" difference="0" hardness="Strong"/>
+                    <depend id="206" type="1" difference="0" hardness="Strong"/>
+                    <depend id="209" type="2" difference="0" hardness="Strong"/>
+                </task>
+            </task>
+            <task id="6" name="Meeting" color="#8cb6ce" meeting="false" start="2014-02-11" duration="36" complete="37" expand="true">
+                <task id="206" name="First meeting" color="#8cb6ce" meeting="false" start="2014-02-11" duration="1" complete="100" expand="true"/>
+                <task id="7" name="Architecture" color="#8cb6ce" meeting="false" start="2014-02-25" duration="4" complete="19" expand="true">
+                    <depend id="200" type="2" difference="0" hardness="Strong"/>
+                    <depend id="209" type="2" difference="0" hardness="Strong"/>
+                </task>
+                <task id="209" name="Specification" color="#33ff33" meeting="false" start="2014-03-03" duration="2" complete="0" expand="true"/>
+                <task id="200" name="Mind map" color="#990099" meeting="false" start="2014-03-03" duration="2" complete="100" expand="true"/>
+                <task id="204" name="Last meeting" color="#8cb6ce" meeting="false" start="2014-04-01" duration="1" complete="0" expand="true"/>
+            </task>
+            <task id="8" name="Coding" color="#8cb6ce" meeting="false" start="2014-03-03" duration="20" complete="7" expand="true">
+                <task id="9" name="Driver" color="#8cb6ce" meeting="false" start="2014-03-03" duration="15" complete="6" expand="true">
+                    <task id="10" name="Symbol devise" color="#8cb6ce" meeting="false" start="2014-03-03" duration="5" complete="10" expand="true">
+                        <task id="199" name="Add handling function" color="#33ff33" meeting="false" start="2014-03-03" duration="5" complete="21" expand="true">
+                            <depend id="13" type="2" difference="0" hardness="Strong"/>
+                            <depend id="14" type="2" difference="0" hardness="Strong"/>
+                        </task>
+                        <task id="11" name="Create a file of the driver" color="#990099" meeting="false" start="2014-03-03" duration="5" complete="0" expand="true">
+                            <depend id="13" type="2" difference="0" hardness="Strong"/>
+                            <depend id="14" type="2" difference="0" hardness="Strong"/>
+                            <depend id="15" type="2" difference="0" hardness="Strong"/>
+                        </task>
+                    </task>
+                    <task id="12" name="Working with processes" color="#8cb6ce" meeting="false" start="2014-03-10" duration="5" complete="9" expand="true">
+                        <task id="13" name="View process list" color="#8cb6ce" meeting="false" start="2014-03-10" duration="1" complete="100" expand="true"/>
+                        <task id="14" name="Kill process" color="#33ff33" meeting="false" start="2014-03-10" duration="5" complete="0" expand="true">
+                            <depend id="16" type="2" difference="0" hardness="Strong"/>
+                        </task>
+                        <task id="15" name="Catch run process" color="#990099" meeting="false" start="2014-03-10" duration="5" complete="0" expand="true">
+                            <depend id="16" type="2" difference="0" hardness="Strong"/>
+                        </task>
+                    </task>
+                    <task id="16" name="Interaction modules" color="#8cb6ce" meeting="false" start="2014-03-17" duration="5" complete="0" expand="true">
+                        <depend id="18" type="2" difference="0" hardness="Strong"/>
+                        <depend id="19" type="2" difference="0" hardness="Strong"/>
+                    </task>
+                </task>
+                <task id="17" name="GUI" color="#8cb6ce" meeting="false" start="2014-03-24" duration="5" complete="10" expand="true">
+                    <task id="18" name="Form" color="#990099" meeting="false" start="2014-03-24" duration="5" complete="0" expand="true"/>
+                    <task id="19" name="Binding files" color="#33ff33" meeting="false" start="2014-03-24" duration="5" complete="20" expand="true"/>
+                </task>
+            </task>
+            <task id="20" name="Refactoring" color="#8cb6ce" meeting="false" start="2014-03-27" duration="3" complete="0" expand="true"/>
+            <task id="22" name="Bugfix" color="#8cb6ce" meeting="false" start="2014-03-31" duration="2" complete="0" expand="true"/>
+            <task id="21" name="Integration" color="#8cb6ce" meeting="false" start="2014-04-01" duration="1" complete="0" expand="true"/>
+        </task>
+        <task id="160" name="Presentation" color="#8cb6ce" meeting="false" start="2014-04-02" duration="1" complete="0" expand="true"/>
+    </tasks>
+    <resources>
+        <resource id="0" name="Orest" function="Default:1" contacts="" phone=""/>
+        <resource id="1" name="Vadim" function="Default:1" contacts="" phone=""/>
+    </resources>
+    <allocations>
+        <allocation task-id="1" resource-id="0" function="Default:1" responsible="true" load="0.0"/>
+        <allocation task-id="4" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="5" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="3" resource-id="0" function="Default:1" responsible="true" load="0.0"/>
+        <allocation task-id="7" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="8" resource-id="0" function="Default:1" responsible="true" load="0.0"/>
+        <allocation task-id="9" resource-id="0" function="Default:1" responsible="true" load="0.0"/>
+        <allocation task-id="10" resource-id="0" function="Default:1" responsible="true" load="0.0"/>
+        <allocation task-id="11" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="12" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="13" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="15" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="16" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="17" resource-id="0" function="Default:1" responsible="true" load="0.0"/>
+        <allocation task-id="18" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="20" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="22" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="21" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="160" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="200" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="206" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="204" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="6" resource-id="0" function="Default:1" responsible="true" load="0.0"/>
+        <allocation task-id="1" resource-id="1" function="Default:1" responsible="true" load="0.0"/>
+        <allocation task-id="4" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="5" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="6" resource-id="1" function="Default:1" responsible="true" load="0.0"/>
+        <allocation task-id="3" resource-id="1" function="Default:1" responsible="true" load="0.0"/>
+        <allocation task-id="7" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="8" resource-id="1" function="Default:1" responsible="true" load="0.0"/>
+        <allocation task-id="9" resource-id="1" function="Default:1" responsible="true" load="0.0"/>
+        <allocation task-id="10" resource-id="1" function="Default:1" responsible="true" load="0.0"/>
+        <allocation task-id="199" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="12" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="13" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="14" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="16" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="17" resource-id="1" function="Default:1" responsible="true" load="0.0"/>
+        <allocation task-id="19" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="20" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="22" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="21" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="160" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="209" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="206" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="204" resource-id="1" function="Default:1" responsible="true" load="100.0"/>
+    </allocations>
+    <vacations/>
+    <taskdisplaycolumns>
+        <displaycolumn property-id="tpd2" order="-1" width="75" visible="false"/>
+        <displaycolumn property-id="tpd7" order="-1" width="75" visible="false"/>
+        <displaycolumn property-id="tpd10" order="-1" width="75" visible="false"/>
+        <displaycolumn property-id="tpd11" order="-1" width="75" visible="false"/>
+        <displaycolumn property-id="tpd9" order="-1" width="75" visible="false"/>
+        <displaycolumn property-id="tpd1" order="-1" width="75" visible="false"/>
+        <displaycolumn property-id="tpd0" order="-1" width="75" visible="false"/>
+        <displaycolumn property-id="tpd3" order="0" width="242" visible="true"/>
+        <displaycolumn property-id="tpd4" order="1" width="59" visible="true"/>
+        <displaycolumn property-id="tpd5" order="2" width="61" visible="true"/>
+        <displaycolumn property-id="tpd6" order="3" width="31" visible="true"/>
+        <displaycolumn property-id="tpd8" order="4" width="81" visible="true"/>
+    </taskdisplaycolumns>
+    <previous/>
+    <roles roleset-name="Default"/>
+</project>
