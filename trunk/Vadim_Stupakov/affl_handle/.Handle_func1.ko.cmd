@@ -1,0 +1,1 @@
+cmd_/home/vadimorest/Vadim/eclipse/kernel/affl_handle/Handle_func1.ko := ld -r -m elf_i386 -T /usr/src/linux-headers-3.11.0-17-generic/scripts/module-common.lds --build-id  -o /home/vadimorest/Vadim/eclipse/kernel/affl_handle/Handle_func1.ko /home/vadimorest/Vadim/eclipse/kernel/affl_handle/Handle_func1.o /home/vadimorest/Vadim/eclipse/kernel/affl_handle/Handle_func1.mod.o
