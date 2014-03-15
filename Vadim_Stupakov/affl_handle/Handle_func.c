@@ -58,7 +58,7 @@ static ssize_t affl_read(struct file *f, char __user *buf, size_t len,
 
 	affl_handle(c);
 
-	if (a) //ЖЕСТОКИЙ КОСТЫЛЬ !
+	if (a) //Bad
 	{
 		a = 0;
 		return (affl_size);
