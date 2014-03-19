@@ -1,5 +1,6 @@
-Software requirements specification
 
+
+Software requirements specification
 
 
 Introduction
@@ -11,51 +12,51 @@ Firewall for management process in linux.
 
 Overall Description
 	Product features
-	Exist blacklist for pocesses.
-	Exist process list.
-	Add process to blacklist.
-	Remove process from blacklist.
-	Add not running processes to blacklist by path.
-	Kill process.
-	Display information about the selected process in the process list.
+Exist blacklist for pocesses.
+Exist process list.
+Add process to blacklist.
+Remove process from blacklist.
+Add not running processes to blacklist by path.
+Kill process.
+Display information about the selected process in the process list.
 	
 	User documentation
-	Test plan.
-	Code documentation.
-	UI documentation.
-	Diagram which show the work of application.
-	Presentation.
+Test plan.
+Code documentation.
+UI documentation.
+Diagram which show the work of application.
+Presentation.
 
 System features
-	File AFFL_black_list : File which contains the list of processes should be added to the blacklist.
-	File AFFL_command: File for communication between UI and driver.
-	Add to blacklist: Adds the selected process to blacklist.
-	Remove from blacklist: Removes the selected user from the user program, the process of the file that should be stored blacklist.
-	Add not running processes blacklisted by name: Adds the path of the executable is not running, the file in the file for the blacklist.
-	Kill process:  Kill the selected process.
-	Display information about the selected process in the process list: Show information about the selected process.
+File AFFL_black_list : File which contains the list of processes should be added to the blacklist.
+File AFFL_command: File for communication between UI and driver.
+Add to blacklist: Adds the selected process to blacklist.
+Remove from blacklist: Removes the selected user from the user program, the process of the file that should be stored blacklist.
+Add not running processes blacklisted by name: Adds the path of the executable is not running, the file in the file for the blacklist.
+Kill process:  Kill the selected process.
+Display information about the selected process in the process list: Show information about the selected process.
 
 
 External interface requirements
 	User interfaces
 		The program uses the UI. There are two forms.
 		In the first form:
-	Field which displays a list of all processes.
-	
-Field that displays the list of blocked processes (blacklist).
-	Field that displays information about the selected process.
+Field which displays a list of all processes.
+Field that displays the list of blocked processes (blacklist).
+Field that displays information about the selected process.
 		5 buttons:
-	Button that updates the list of processes.
-	Button that adds the selected process in the blacklist.
-	Button that removes the selected process from the blacklist.
-	Button that kill the selected process.
-	Button which open the second form.
+Button that updates the list of processes.
+Button that adds the selected process in the blacklist.
+Button that removes the selected process from the blacklist.
+Button that kill the selected process.
+Button which open the second form.
 		The second form:
-	Input field to enter the path to the executable file.
-	Button to add a name of executable file  to the blacklist.
+Input field to enter the path to the executable file.
+Button to add a name of executable file  to the blacklist.
 
 Communication interfaces 
-		Communication between the user program and the driver using the file			(Describe the option / command) (see System features)
+		Communication between the user program and the driver using the file			
+		(Describe the option / command) (see System features)
 
 Limitations
 	The program must be run as root. 
