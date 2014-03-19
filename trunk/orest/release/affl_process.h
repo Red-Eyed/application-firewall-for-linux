@@ -1,5 +1,5 @@
-#ifndef AFFL_PROCES_H
-#define AFFL_PROCES_H
+#ifndef AFFL_PROCESS_H
+#define AFFL_PROCESS_H
 
 #include <linux/moduleparam.h>	
 #include <linux/unistd.h>	
@@ -37,8 +37,8 @@ asm( "pushl %eax \n"             \
 
 
 
-int affl_proces_load(void);
-void affl_proces_unload(void);
+int affl_process_load(void);
+void affl_process_unload(void);
 
 
 

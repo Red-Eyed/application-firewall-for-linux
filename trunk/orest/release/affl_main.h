@@ -9,6 +9,6 @@
 int AFFL_SUCCESS=0;
 
 #include "affl_chrdev.h"
-#include "affl_proces.h"
+#include "affl_process.h"
 
 #endif

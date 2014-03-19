@@ -5,14 +5,14 @@ static int __init affl_mod_load(void)
 {
     printk(KERN_INFO "affl mod load\n");
     affl_chrdev_load();
-    affl_proces_load();
+    affl_process_load();
     return AFFL_SUCCESS;
 }
 
 static void __exit affl_mod_unload(void)
 {
     affl_chrdev_unload();
-    affl_proces_unload();
+    affl_process_unload();
     printk(KERN_INFO "affl mod unload\n");
 }
 
