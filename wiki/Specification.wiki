@@ -1,11 +1,10 @@
 
-
 Software requirements specification
 
 
 Introduction
 	Purpose
-Firewall for management process in linux. 
+                Firewall for management process in linux. 
 
 	Project scope
 		Study new techology, work in command, gaining experience working driver.
