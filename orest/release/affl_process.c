@@ -1,4 +1,4 @@
-#include "affl_proces.h"
+#include "affl_process.h"
 
 /*static unsigned long hex2adr( char *b ) {
     unsigned long res = 0;
@@ -12,12 +12,12 @@
 }
 */
 
-int affl_proces_load(void)
+int affl_process_load(void)
 {
-
+     return 0;
 }
 
-void affl_proces_unload(void)
+void affl_process_unload(void)
 {
 
   
