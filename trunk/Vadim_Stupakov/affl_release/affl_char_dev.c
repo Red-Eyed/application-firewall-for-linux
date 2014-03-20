@@ -7,8 +7,13 @@ dev_t affl_first;
 struct class *affl_cl;
 
 struct file_operations affl_fops =
-{ .owner = THIS_MODULE, .open = affl_open, .release = affl_close, .read =
-		affl_read, .write = affl_write };
+{
+    .owner = THIS_MODULE,
+    .open = affl_open,
+    .release = affl_close,
+    .read =	affl_read,
+    .write = affl_write
+};
 
 char affl_kernel_buf[255];
 int affl_size = 0;
