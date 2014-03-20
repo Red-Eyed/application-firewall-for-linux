@@ -11,11 +11,14 @@
 #include <linux/sched.h>
 #include <asm-generic/uaccess.h>
 #include <linux/kthread.h>
-
+#include <linux/fs.h>
+#include <linux/string.h>
 
 
 
 unsigned int affl_handle(const char* input,  char* user_buf);
-void affl_get_atribute(const char* input);
+void affl_get_atribute(const char* input, char* atribute);
+
+unsigned int affl_view_process(char* user_buf);
 
 #endif /* AFFL_PROCESS_H_ */
