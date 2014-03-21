@@ -29,6 +29,6 @@ void affl_kill_process(char* name);
 
 int affl_from_name_to_pid(char* name);
 
-
+int affl_get_task(void);
 
 #endif /* AFFL_PROCESS_H_ */

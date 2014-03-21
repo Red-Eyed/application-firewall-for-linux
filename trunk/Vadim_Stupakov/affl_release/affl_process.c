@@ -92,88 +92,19 @@ void affl_get_atribute(const char* input, char** atribute)
 
 unsigned int affl_view_process(char* user_buf)
 {
-	int counter = 0;
 	char temp[100];
 	unsigned int count = 0;
-	char proc_name[100];
-	struct file *f = NULL;
-	struct task_struct *task = NULL;
-	mm_segment_t fs;
+	int i = 0;
 	memset(temp, 0, 100);
-	memset(proc_name, 0, 100);
 	printk("affl_Driver: affl_handle(): command =  view\n");
-	for_each_process(task)
+	affl_get_task();
+	for(i = 0; i < affl_cnt_process_mas; i++)
 	{
-		counter++;
-		if(strlen(task->comm) == 15)
-		{
-			sprintf(temp, "/proc/%d/cmdline", task->pid);
-			f = filp_open(temp, O_RDONLY, 0);
-			if(f == NULL)
-			printk(KERN_ALERT "filp_open error!!.\n");
-			else
-			{
-				// Get current segment descriptor
-				fs = get_fs();
-				// Set segment descriptor associated to kernel space
-				set_fs(get_ds());
-				// Read the file
-				f->f_op->read(f, proc_name, 100, &f->f_pos);
-				// Restore segment descriptor
-				set_fs(fs);
-				//printk("affl_Driver: affl_handle(): proc_name = %s\n", proc_name);
-			}
-			filp_close(f,NULL);
-			if(strlen(proc_name) > 15)
-			{
-				if(strrchr(proc_name, '/'))
-				{
-					char* temp_proc_name = NULL;
-					temp_proc_name = strrchr(proc_name, '/') + 1;
-					printk("temp_proc_name %s\n", temp_proc_name);
-					printk("proc_name %s\n", proc_name);
-
-					strcpy(affl_list_process_mas[affl_cnt_process_mas].process_name, proc_name);
-					affl_list_process_mas[affl_cnt_process_mas].PID = task->pid;
-					affl_cnt_process_mas++;
-
-					sprintf(temp, "[%d] %s\n", task->pid, temp_proc_name);
-				}
-				else
-				{
-					strcpy(affl_list_process_mas[affl_cnt_process_mas].process_name, proc_name);
-					affl_list_process_mas[affl_cnt_process_mas].PID = task->pid;
-					affl_cnt_process_mas++;
-
-					sprintf(temp, "[%d] %s\n", task->pid, proc_name);
-				}
-			}
-			else if(strlen(proc_name) < 15)
-			{
-				strcpy(affl_list_process_mas[affl_cnt_process_mas].process_name, task->comm);
-				affl_list_process_mas[affl_cnt_process_mas].PID = task->pid;
-				affl_cnt_process_mas++;
-				sprintf(temp, "[%d] %s\n", task->pid, task->comm);
-			}
-		}
-		else if(strlen(task->comm) < 15)
-		{
-			strcpy(affl_list_process_mas[affl_cnt_process_mas].process_name, task->comm);
-			affl_list_process_mas[affl_cnt_process_mas].PID = task->pid;
-			affl_cnt_process_mas++;
-			sprintf(temp, "[%d] %s\n", task->pid, task->comm);
-		}
-
-		copy_to_user(user_buf+count, temp, strlen(temp));
-
+		sprintf(temp, " [%d] %s\n", affl_list_process_mas[i].PID, affl_list_process_mas[i].process_name);
+		copy_to_user(user_buf + count, temp, strlen(temp) );
 		count += strlen(temp);
-		memset(proc_name,0,100);
 		memset(temp, 0, 100);
 	}
-	sprintf(temp, "process = %d\n", counter);
-
-	copy_to_user(user_buf + count, temp, strlen(temp));
-	count += strlen(temp);
 	printk("count = %d\n", count);
 	return (count);
 }
@@ -201,40 +132,118 @@ asmlinkage long (*affl_sys_kill)(int pid, int sig);
 
 void affl_kill_process(char* name)
 {
-	int pid = 0;
-	printk("affl_kill_process(): name = %s \n", name);
-	pid = affl_from_name_to_pid(name);
-	if (pid)
+	int i = 0;
+	struct task_struct* task = NULL;
+	for_each_process(task)
 	{
-		affl_sys_kill(pid, 9);
-	}
-	else
-	{
-		printk("affl_kill_process(): bred pid \n");
+		if (strstr(affl_list_process_mas[i].process_name, name))
+		{
+			affl_sys_kill(affl_list_process_mas[i].PID, 9);
+			break;
+		}
+		else
+		{
+			printk("affl_kill_process(): bad pid \n");
+		}
+		i++;
 	}
 }
 
 int affl_from_name_to_pid(char* name)
 {
-	int pid = 0;
+int pid = 0;
+struct task_struct *task = NULL;
+for_each_process(task)
+{
+	printk("affl_from_name_to_pid() task = %p\n", task);
+	printk("affl_from_name_to_pid() name = %s\n", name);
+	printk("affl_from_name_to_pid() task->comm = %s\n", task->comm);
+	if(!strcmp(name, task->comm))
+	{
+		pid = task->pid;
+		printk("affl_from_name_to_pid(): pid = %d", pid);
+		break;
+	}
+	else
+	{
+		printk("affl_from_name_to_pid(): bred pid\n");
+	}
+}
+return pid;
+}
+
+int affl_get_task(void)
+{
+	char path[100];
+	char proc_name[100];
+	struct file *f = NULL;
 	struct task_struct *task = NULL;
+	mm_segment_t fs;
+	memset(path, 0, 100);
+	memset(proc_name, 0, 100);
+	affl_cnt_process_mas = 0;
+
 	for_each_process(task)
 	{
-		printk("affl_from_name_to_pid() task = %p\n", task);
-		printk("affl_from_name_to_pid() name = %s\n", name);
-		printk("affl_from_name_to_pid() task->comm = %s\n", task->comm);
-		if(!strcmp(name, task->comm))
+		if(strlen(task->comm) == 15)
 		{
-			pid = task->pid;
-			printk("affl_from_name_to_pid(): pid = %d", pid);
-			break;
+			sprintf(path, "/proc/%d/cmdline", task->pid);
+			f = filp_open(path, O_RDONLY, 0);
+			if(f == NULL)
+			{
+				printk(KERN_ALERT "filp_open error!!.\n");
+			}
+			else
+			{
+				// Get current segment descriptor
+				fs = get_fs();
+				// Set segment descriptor associated to kernel space
+				set_fs(get_ds());
+				// Read the file
+				f->f_op->read(f, proc_name, 100, &f->f_pos);
+				// Restore segment descriptor
+				set_fs(fs);
+				//printk("affl_Driver: affl_handle(): proc_name = %s\n", proc_name);
+			}
+			filp_close(f,NULL);
+
+			if(strlen(proc_name) > 15)
+			{
+				if(strrchr(proc_name, '/'))
+				{
+					char* temp_proc_name = NULL;
+					temp_proc_name = strrchr(proc_name, '/') + 1;
+					//printk("temp_proc_name %s\n", temp_proc_name);
+					//printk("proc_name %s\n", proc_name);
+
+					strcpy(affl_list_process_mas[affl_cnt_process_mas].process_name, temp_proc_name);
+					affl_list_process_mas[affl_cnt_process_mas].PID = task->pid;
+					affl_cnt_process_mas++;
+				}
+				else
+				{
+					strcpy(affl_list_process_mas[affl_cnt_process_mas].process_name, proc_name);
+					affl_list_process_mas[affl_cnt_process_mas].PID = task->pid;
+					affl_cnt_process_mas++;
+				}
+			}
+			else if(strlen(proc_name) < 15)
+			{
+				strcpy(affl_list_process_mas[affl_cnt_process_mas].process_name, task->comm);
+				affl_list_process_mas[affl_cnt_process_mas].PID = task->pid;
+				affl_cnt_process_mas++;
+			}
 		}
-		else
+		else if(strlen(task->comm) < 15)
 		{
-			printk("affl_from_name_to_pid(): bred pid\n");
+			strcpy(affl_list_process_mas[affl_cnt_process_mas].process_name, task->comm);
+			affl_list_process_mas[affl_cnt_process_mas].PID = task->pid;
+			affl_cnt_process_mas++;
 		}
+		memset(path, 0, 100);
+		memset(proc_name, 0, 100);
 	}
-	return pid;
+	return 0;
 }
 
 void affl_init_process(void)
