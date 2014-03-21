@@ -24,11 +24,14 @@ MODULE_DESCRIPTION("Handler module");
 int init_module(void) /* Constructor */
 {
 	printk(KERN_INFO "affl_Driver: registered\n");
+
+	affl_init_process();
 	affl_init_char_dev("affl_comm", "affl_device");
 	return (0);
 }
 void cleanup_module(void) /* Destructor */
 {
+	affl_clean_process();
 	affl_clean_char_dev();
 	printk(KERN_INFO "affl_Driver: unregistered\n");
 }
