@@ -3,125 +3,180 @@
 
 #include "affl_process.h"
 
+struct affl_list_process
+{
+	char process_name[50];
+	int PID;
+};
+
+struct affl_list_process affl_list_process_mas[300];
+int affl_cnt_process_mas = 0;
+
+//affl_list_process affl_list_process_bl[100];
+//static affl_cnt_bl = 0;
+
 unsigned int affl_handle(const char* input, char* user_buf)
 {
-    //Command/////////////////////////////////
-    const char affl_kill[] = "kill";
-    const char affl_view[] = "view";
-    const char affl_getInfo[] = "getInfo";
-    const char affl_addProc[] = "addProc";
-    const char affl_rmProc[] = "rmProc";
+	//Command/////////////////////////////////
+	const char affl_kill[] = "kill";
+	const char affl_view[] = "view";
+	const char affl_getInfo[] = "getInfo";
+	const char affl_addProc[] = "addProc";
+	const char affl_rmProc[] = "rmProc";
 
-    char* atribute = NULL;
+	char* atribute = NULL;
 
-    printk("affl_Driver: affl_handle(): open\n");
+	printk("affl_Driver: affl_handle(): open\n");
 
-    //Handle command view
-    if (strstr(input, affl_view))
-    {
-        unsigned long count = 0;
-        count = affl_view_process(user_buf);
-        printk("affl_Driver: affl_handle(): view\n");
-        return (count);
-    }
-    //Handle command kill
-    else if (strstr(input, affl_kill))
-    {
-        printk("affl_Driver: affl_handle(): command =  kill\n");
-        //Handle atribute
-        affl_get_atribute(input, &atribute);
-        printk("affl_Driver: affl_handle(): atribute =  %s\n", atribute);
-        affl_kill_process(atribute);
-    }
-    //Handle command getInfo
-    else if (strstr(input, affl_getInfo))
-    {
-        printk("affl_Driver: affl_handle():  command = getInfo \n");
-        //Handle atribute
-        affl_get_atribute(input, &atribute);
-        //Add your functio
-    }
-    //Handle command addProc
-    else if (strstr(input, affl_addProc))
-    {
-        printk("affl_Driver: affl_handle():  command = addProc \n");
-        //Handle atribute
-        affl_get_atribute(input, &atribute);
-        //Add your function
-    }
-    //Handle command rmProc
-    else if (strstr(input, affl_rmProc))
-    {
-        printk("affl_Driver: affl_handle():  command = rmProc \n");
-        //Handle atribute
-        affl_get_atribute(input, &atribute);
-        //Add your function
-    }
+	//Handle command view
+	if (strstr(input, affl_view))
+	{
+		unsigned long count = 0;
+		count = affl_view_process(user_buf);
+		printk("affl_Driver: affl_handle(): view\n");
+		return (count);
+	}
+	//Handle command kill
+	else if (strstr(input, affl_kill))
+	{
+		printk("affl_Driver: affl_handle(): command =  kill\n");
+		//Handle atribute
+		affl_get_atribute(input, &atribute);
+		printk("affl_Driver: affl_handle(): atribute =  %s\n", atribute);
+		affl_kill_process(atribute);
+	}
+	//Handle command getInfo
+	else if (strstr(input, affl_getInfo))
+	{
+		printk("affl_Driver: affl_handle():  command = getInfo \n");
+		//Handle atribute
+		affl_get_atribute(input, &atribute);
+		//Add your functio
+	}
+	//Handle command addProc
+	else if (strstr(input, affl_addProc))
+	{
+		printk("affl_Driver: affl_handle():  command = addProc \n");
+		//Handle atribute
+		affl_get_atribute(input, &atribute);
+		//Add your function
+	}
+	//Handle command rmProc
+	else if (strstr(input, affl_rmProc))
+	{
+		printk("affl_Driver: affl_handle():  command = rmProc \n");
+		//Handle atribute
+		affl_get_atribute(input, &atribute);
+		//Add your function
+	}
 
-    vfree(atribute);
-    printk("affl_Driver: affl_handle(): close\n");
-    return (0);
+	vfree(atribute);
+	printk("affl_Driver: affl_handle(): close\n");
+	return (0);
 }
 
 void affl_get_atribute(const char* input, char** atribute)
 {
-    char* begin = NULL;
-    char* end = NULL;
-    if (strstr(input, "@"))
-    {
-        begin = strstr(input, "@");
-        end = strstr(input, "#");
-        begin++;
-        *atribute = vmalloc(end - begin);
-        memcpy(*atribute, begin, (size_t) (end - begin));
-        printk("affl_handle(): atribute = %s \n", *atribute);
-    }
+	char* begin = NULL;
+	char* end = NULL;
+	if (strstr(input, "@"))
+	{
+		begin = strstr(input, "@");
+		end = strstr(input, "#");
+		begin++;
+		*atribute = vmalloc(end - begin);
+		memcpy(*atribute, begin, (size_t) (end - begin));
+		printk("affl_handle(): atribute = %s \n", *atribute);
+	}
 }
-
 
 unsigned int affl_view_process(char* user_buf)
 {
-    char temp[100];
-    unsigned int count = 0;
-//        char proc_name[100];
-//        struct file *f = NULL;
-    struct task_struct *task = NULL;
-//        mm_segment_t fs;
-    memset(temp, 0, 100);
-    printk("affl_Driver: affl_handle(): command =  view\n");
-    for_each_process(task)
-    {
-        sprintf(temp, "/proc/%d/cmdline", task->pid);
-        //printk("affl_Driver: affl_handle(): temp = %s\n", temp);
-//		f = filp_open(temp, O_RDONLY, 0);
-//		if(f == NULL)
-//		printk(KERN_ALERT "filp_open error!!.\n");
-//		else
-//		{
-//			// Get current segment descriptor
-//			fs = get_fs();
-//			// Set segment descriptor associated to kernel space
-//			set_fs(get_ds());
-//			// Read the file
-//			f->f_op->read(f, proc_name, 100, &f->f_pos);
-//			// Restore segment descriptor
-//			set_fs(fs);
-//			//printk("affl_Driver: affl_handle(): proc_name = %s\n", proc_name);
-//		}
-//		filp_close(f,NULL);
-        //printk("=========================================================\n");
-        printk("%s [%d]\n", task->comm, task->pid);
-        sprintf(temp, "%d %s\n", task->pid, task->comm);
-        copy_to_user(user_buf+count, temp, strlen(temp));
-        //printk("temp = %s", temp);
-        //printk("user_buf = %s", user_buf);
-        //printk("=========================================================\n");
-        count += strlen(temp);
-        //memset(proc_name,' ',100);
-    }
-    return (count);
-}
+	int counter = 0;
+	char temp[100];
+	unsigned int count = 0;
+	char proc_name[100];
+	struct file *f = NULL;
+	struct task_struct *task = NULL;
+	mm_segment_t fs;
+	memset(temp, 0, 100);
+	memset(proc_name, 0, 100);
+	printk("affl_Driver: affl_handle(): command =  view\n");
+	for_each_process(task)
+	{
+		counter++;
+		if(strlen(task->comm) == 15)
+		{
+			sprintf(temp, "/proc/%d/cmdline", task->pid);
+			f = filp_open(temp, O_RDONLY, 0);
+			if(f == NULL)
+			printk(KERN_ALERT "filp_open error!!.\n");
+			else
+			{
+				// Get current segment descriptor
+				fs = get_fs();
+				// Set segment descriptor associated to kernel space
+				set_fs(get_ds());
+				// Read the file
+				f->f_op->read(f, proc_name, 100, &f->f_pos);
+				// Restore segment descriptor
+				set_fs(fs);
+				//printk("affl_Driver: affl_handle(): proc_name = %s\n", proc_name);
+			}
+			filp_close(f,NULL);
+			if(strlen(proc_name) > 15)
+			{
+				if(strrchr(proc_name, '/'))
+				{
+					char* temp_proc_name = NULL;
+					temp_proc_name = strrchr(proc_name, '/') + 1;
+					printk("temp_proc_name %s\n", temp_proc_name);
+					printk("proc_name %s\n", proc_name);
 
+					strcpy(affl_list_process_mas[affl_cnt_process_mas].process_name, proc_name);
+					affl_list_process_mas[affl_cnt_process_mas].PID = task->pid;
+					affl_cnt_process_mas++;
+
+					sprintf(temp, "[%d] %s\n", task->pid, temp_proc_name);
+				}
+				else
+				{
+					strcpy(affl_list_process_mas[affl_cnt_process_mas].process_name, proc_name);
+					affl_list_process_mas[affl_cnt_process_mas].PID = task->pid;
+					affl_cnt_process_mas++;
+
+					sprintf(temp, "[%d] %s\n", task->pid, proc_name);
+				}
+			}
+			else if(strlen(proc_name) < 15)
+			{
+				strcpy(affl_list_process_mas[affl_cnt_process_mas].process_name, task->comm);
+				affl_list_process_mas[affl_cnt_process_mas].PID = task->pid;
+				affl_cnt_process_mas++;
+				sprintf(temp, "[%d] %s\n", task->pid, task->comm);
+			}
+		}
+		else if(strlen(task->comm) < 15)
+		{
+			strcpy(affl_list_process_mas[affl_cnt_process_mas].process_name, task->comm);
+			affl_list_process_mas[affl_cnt_process_mas].PID = task->pid;
+			affl_cnt_process_mas++;
+			sprintf(temp, "[%d] %s\n", task->pid, task->comm);
+		}
+
+		copy_to_user(user_buf+count, temp, strlen(temp));
+
+		count += strlen(temp);
+		memset(proc_name,0,100);
+		memset(temp, 0, 100);
+	}
+	sprintf(temp, "process = %d\n", counter);
+
+	copy_to_user(user_buf + count, temp, strlen(temp));
+	count += strlen(temp);
+	printk("count = %d\n", count);
+	return (count);
+}
 
 void* find_sym(const char *sym)
 {
@@ -149,7 +204,7 @@ void affl_kill_process(char* name)
 	int pid = 0;
 	printk("affl_kill_process(): name = %s \n", name);
 	pid = affl_from_name_to_pid(name);
-	if(pid)
+	if (pid)
 	{
 		affl_sys_kill(pid, 9);
 	}
@@ -190,5 +245,4 @@ void affl_clean_process(void)
 {
 
 }
-
 #endif /* AFFL_PROCESS_C_ */
