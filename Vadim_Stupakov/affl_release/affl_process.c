@@ -133,8 +133,8 @@ asmlinkage long (*affl_sys_kill)(int pid, int sig);
 void affl_kill_process(char* name)
 {
     int i = 0;
-    struct task_struct* task = NULL;
-    for_each_process(task)
+    affl_get_task();
+    for(i = 0; i < affl_cnt_process_mas; i++)
     {
         if (strstr(affl_list_process_mas[i].process_name, name))
         {
@@ -145,7 +145,6 @@ void affl_kill_process(char* name)
         {
             printk("affl_kill_process(): bad pid \n");
         }
-        i++;
     }
 }
 
