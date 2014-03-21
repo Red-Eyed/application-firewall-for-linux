@@ -15,10 +15,6 @@
 #include <asm-generic/uaccess.h>
 #include "affl_process.h"
 
-extern struct file_operations affl_fops;
-extern char affl_kernel_buf[255];       // Global variable for the bufer in kernel space
-extern int affl_size;                   // Global variable for the bufer size
-
 int affl_open(struct inode *i, struct file *f);
 int affl_close(struct inode *i, struct file *f);
 ssize_t affl_read(struct file *f, char __user *buf, size_t len, loff_t *off);
