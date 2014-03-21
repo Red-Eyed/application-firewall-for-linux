@@ -1,24 +1,8 @@
 #include "affl_main.h"
 
-//int init_module(void)
-//{
-//	struct task_struct *task;
-//	for_each_process(task)
-//	{
-//		printk("%s [%d]\n", task->comm, task->pid);
-//	}
-//	return 0;
-//}
-//
-//void cleanup_module(void)
-//{
-//	printk(KERN_INFO "Cleaning Up.\n");
-//}
-
-
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Vadim ");
-MODULE_DESCRIPTION("Handler module");
+MODULE_DESCRIPTION("affl_module");
 
 
 int init_module(void) /* Constructor */

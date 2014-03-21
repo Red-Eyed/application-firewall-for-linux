@@ -27,10 +27,4 @@ ssize_t affl_write(struct file *f, const char __user *buf, size_t len, loff_t *o
 int affl_init_char_dev(const char* file_name, const char* device_name);
 void affl_clean_char_dev(void);
 
-extern dev_t first;                     // Global variable for the first device number
-extern struct cdev c_dev;               // Global variable for the character device structure
-extern struct class *cl;                // Global variable for the device class
-
-extern int affl_flag;
-
 #endif /* AFFL_CHAR_DEV_H_ */
