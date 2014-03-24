@@ -18,12 +18,13 @@ void affl_clean_process(void);
 
 unsigned int affl_handle(const char* input,  char* user_buf);
 void affl_get_proc_name(const char* input, char** atribute);
+void affl_get_proc_PID(const char* input, int* PID);
 
 unsigned int affl_view_process(char* user_buf);
 
 void* affl_find_sym(const char *sym);
 
-void affl_kill_process(char* name);
+void affl_kill_process(const char* name, int PID);
 
 int affl_from_name_to_pid(char* name);
 

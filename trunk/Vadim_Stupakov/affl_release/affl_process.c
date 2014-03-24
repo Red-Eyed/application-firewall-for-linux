@@ -18,13 +18,14 @@ int affl_cnt_process_mas = 0;
 unsigned int affl_handle(const char* input, char* user_buf)
 {
     //Command/////////////////////////////////
-    const char affl_kill[] = "kill";
-    const char affl_view[] = "view";
-    const char affl_getInfo[] = "getInfo";
-    const char affl_addProc[] = "addProc";
-    const char affl_rmProc[] = "rmProc";
+    const char affl_kill[] = "kill@";
+    const char affl_view[] = "view@";
+    const char affl_getInfo[] = "getInfo@";
+    const char affl_addProc[] = "addProc@";
+    const char affl_rmProc[] = "rmProc@";
 
     char* proc_name = NULL;
+    int PID = 0;
 
     printk("affl_Driver: affl_handle(): open\n");
 
@@ -42,8 +43,9 @@ unsigned int affl_handle(const char* input, char* user_buf)
         printk("affl_Driver: affl_handle(): command =  kill\n");
         //Handle atribute
         affl_get_proc_name(input, &proc_name);
+        affl_get_proc_PID(input, &PID);
         printk("affl_Driver: affl_handle(): atribute =  %s\n", proc_name);
-        affl_kill_process(proc_name);
+        affl_kill_process(proc_name, PID);
     }
     //Handle command getInfo
     else if (strstr(input, affl_getInfo))
@@ -86,7 +88,22 @@ void affl_get_proc_name(const char* input, char** proc_name)
         begin++;
         *proc_name = vmalloc(end - begin);
         memcpy(*proc_name, begin, (size_t) (end - begin));
-        printk("affl_handle(): atribute = %s \n", *proc_name);
+        printk("affl_get_proc_name(): proc_name = %s \n", *proc_name);
+    }
+}
+
+void affl_get_proc_PID(const char* input, int* PID)
+{
+    char* strPID = NULL;
+    if ((strPID = strstr(input, "%")))
+    {
+        kstrtoint(strPID+1, 10, PID);
+        printk("affl_get_proc_PID(): PID = %d\n", *PID);
+        printk("affl_get_proc_PID(): strPID = %s\n", strPID);
+    }
+    else
+    {
+        *PID = 0;
     }
 }
 
@@ -96,7 +113,7 @@ unsigned int affl_view_process(char* user_buf)
     unsigned int count = 0;
     int i = 0;
     memset(temp, 0, 100);
-    printk("affl_Driver: affl_handle(): command =  view\n");
+    printk("affl_view_process(): command =  view\n");
     affl_get_task();
     for (i = 0; i < affl_cnt_process_mas; i++)
     {
@@ -130,20 +147,30 @@ void* affl_find_sym(const char *sym)
 
 asmlinkage long (*affl_sys_kill)(int pid, int sig);
 
-void affl_kill_process(char* name)
+void affl_kill_process(const char* name, int PID)
 {
     int i = 0;
     affl_get_task();
-    for(i = 0; i < affl_cnt_process_mas; i++)
+    if(PID < 0)
     {
-        if (strstr(affl_list_process_mas[i].process_name, name))
+        for (i = 0; i < affl_cnt_process_mas; i++)
         {
-            affl_sys_kill(affl_list_process_mas[i].PID, 9);
-            break;
+            if (strstr(affl_list_process_mas[i].process_name, name))
+            {
+                affl_sys_kill(affl_list_process_mas[i].PID, 9);
+            }
         }
-        else
+    }
+    else if (PID > 0)
+    {
+        for (i = 0; i < affl_cnt_process_mas; i++)
         {
-            printk("affl_kill_process(): bad pid \n");
+            if (strstr(affl_list_process_mas[i].process_name, name) &&
+                    affl_list_process_mas[i].PID == PID)
+            {
+                affl_sys_kill(affl_list_process_mas[i].PID, 9);
+                break;
+            }
         }
     }
 }
@@ -180,6 +207,7 @@ int affl_get_task(void)
     mm_segment_t fs;
     memset(path, 0, 100);
     memset(proc_name, 0, 100);
+    memset(affl_list_process_mas, 0, sizeof(affl_list_process_mas));
     affl_cnt_process_mas = 0;
 
     for_each_process(task)
