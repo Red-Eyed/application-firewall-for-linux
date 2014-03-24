@@ -23,8 +23,6 @@ static struct file_operations fops = {
 int ds_char_test_dev_init(void)
 {
     major = register_chrdev(0, DEVICE_NAME, &fops);
-    unregister_chrdev(major, DEVICE_NAME);
-    major = register_chrdev(major, DEVICE_NAME, &fops);
     if (major < 0)
     {
         printk(KERN_INFO "Registering char_test_device failed with %d\n", major);
