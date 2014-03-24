@@ -3,9 +3,9 @@
 
 static int __init affl_mod_load(void)
 {
-    printk(KERN_INFO "affl mod load\n");
-    affl_chrdev_load();
+    printk(KERN_INFO "affl mod load%d\n",RARI);
     affl_process_load();
+    affl_chrdev_load();
     return AFFL_SUCCESS;
 }
 

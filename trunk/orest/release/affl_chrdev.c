@@ -7,8 +7,19 @@ static struct class *affl_class;
 static int affl_len_buffer=0; 
 static char affl_buffer[/*affl_size_buffer*/500];
 
-static int major;
+int affl_init_result=0;
 static int counterr = 0;
+
+//static char temp[100];
+
+/*static int fofoo(char *us_buf)
+{
+  sprintf( temp, "borobora");
+  copy_to_user(us_buf,temp,strlen(temp));
+  
+  
+  return strlen(temp);
+}*/
 
 static ssize_t affl_comand_read( struct file* F, char *buf, size_t len, loff_t *f_pos )
 {
@@ -43,14 +54,30 @@ static ssize_t affl_comand_read( struct file* F, char *buf, size_t len, loff_t *
 static ssize_t affl_comand_write( struct file* F, const char *buf, size_t len, loff_t *f_pos )
 {  
     
-  int i=0;
+ /* int i=0;
   printk(KERN_INFO "\nwrite\n");
-  for(i=0;i<len && i<500/*affl_size_buffer*/;i++)
+  for(i=0;i<len && i<500;i++)
   {
     get_user(affl_buffer[i],buf+i);
   }
-  affl_len_buffer=i;
-  return i;
+  affl_len_buffer=i;*/
+ char temp[100];
+ if(buf[0]=='+')
+ {
+   copy_from_user(temp,buf+1,len-1);
+   temp[len-2]='\0';
+   affl_bl_add(temp);
+ }
+ if(buf[0]=='-')
+ {
+   copy_from_user(temp,buf+1,len-1);
+   temp[len-2]='\0';
+   affl_bl_rm(temp);
+ }
+ if(buf[0]=='=')
+   affl_bl_print();
+ 
+  return len;
 }
 
 static int affl_comand_open( struct inode *inode, struct file *file )
@@ -74,16 +101,18 @@ static struct file_operations affl_fop =
 
 int affl_chrdev_load(void)
 {
-  major = alloc_chrdev_region( &MajMin, 0, 1, "affl_chrdev" );
   
-  if( 0 > major )
+
+  affl_init_result = alloc_chrdev_region( &MajMin, 0, 1, "affl_chrdev" );
+  
+  if( 0 > affl_init_result )
   {
     printk( KERN_INFO "Device Registration failed\n" );
     return -1;
   }
   else
   {
-    printk( KERN_INFO "Major number is: %d\n",major );
+    printk( KERN_INFO "init_result: %d\n",affl_init_result );
     //return 0;
   }
   
@@ -124,5 +153,5 @@ void affl_chrdev_unload(void)
   class_destroy( affl_class );
   unregister_chrdev_region( MajMin, 1 );
   
-  printk(KERN_INFO "Device unregisteredlol\n");
+  printk(KERN_INFO "Device unregistered\n");
 }
