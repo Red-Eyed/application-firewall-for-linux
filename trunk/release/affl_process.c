@@ -11,8 +11,6 @@ struct affl_list_process
 
 static void **taddr;
 
-
-
 #define affl_sys_call "sys_execve"
 #define affl_new_sys_call new_sys_execve
 #define affl_old_sys_call old_sys_execve
@@ -21,7 +19,7 @@ static void **taddr;
 struct affl_list_process affl_list_process_mas[300];
 int affl_cnt_process_mas = 0;
 
-struct affl_list_process affl_list_process_bl[100];
+struct affl_list_process affl_black_list[100];
 static int affl_cnt_bl = 0;
 
 unsigned int affl_handle(const char* input, char* user_buf)
@@ -32,10 +30,12 @@ unsigned int affl_handle(const char* input, char* user_buf)
 	const char affl_getInfo[] = "getInfo@";
 	const char affl_addProc[] = "addProc@";
 	const char affl_rmProc[] = "rmProc@";
-
+	const char affl_ex[] = "exist@";
+	const char affl_getBL[] = "getBL@";
 
 	char* proc_name = NULL;
 	int PID = 0;
+	unsigned int count_of_symbols = 0;
 
 	printk("affl_Driver: affl_handle(): open\n");
 
@@ -43,10 +43,9 @@ unsigned int affl_handle(const char* input, char* user_buf)
 	if (strstr(input, affl_view))
 	{
 		//affl_view_process(user_buf);
-		unsigned int count = 0;
-		count = affl_view_process(user_buf);
+		count_of_symbols = affl_view_process(user_buf);
+		affl_get_task();
 		printk("affl_Driver: affl_handle(): view\n");
-		return (count);
 	}
 
 	//Handle command kill
@@ -83,44 +82,51 @@ unsigned int affl_handle(const char* input, char* user_buf)
 		//Handle atribute
 		affl_get_proc_name(input, &proc_name);
 		affl_bl_rm(proc_name);
+	}//Handle command exist
+	else if (strstr(input, affl_getBL))
+	{
+		count_of_symbols = affl_get_black_list(user_buf);
+	}
+	else if (strstr(input, affl_ex))
+	{
+		count_of_symbols = affl_exist(user_buf);
 	}
 
 	vfree(proc_name);
 	printk("affl_Driver: affl_handle(): close\n");
-	return (0);
+	return (count_of_symbols);
 }
 
 //get second param: command@atribute#
 void affl_get_proc_name(const char* input, char** proc_name)
 {
-    char* begin = NULL;
-    char* end = NULL;
-    if (strstr(input, "@"))
-    {
-        begin = strstr(input, "@");
-        end = strstr(input, "#");
-        begin++;
-        *proc_name = vmalloc(end - begin);
-        memcpy(*proc_name, begin, (size_t) (end - begin));
-        printk("affl_get_proc_name(): proc_name = %s \n", *proc_name);
-    }
+	char* begin = NULL;
+	char* end = NULL;
+	if (strstr(input, "@"))
+	{
+		begin = strstr(input, "@");
+		end = strstr(input, "#");
+		begin++;
+		*proc_name = vmalloc(end - begin);
+		memcpy(*proc_name, begin, (size_t) (end - begin));
+		printk("affl_get_proc_name(): proc_name = %s \n", *proc_name);
+	}
 }
 
 void affl_get_proc_PID(const char* input, int* PID)
 {
-    char* strPID = NULL;
-    if ((strPID = strstr(input, "%")))
-    {
-        kstrtoint((strPID+1), 10, PID);
-        printk("affl_get_proc_PID(): PID = %d\n", *PID);
-        printk("affl_get_proc_PID(): strPID = %s\n", strPID);
-    }
-    else
-    {
-        *PID = 0;
-    }
+	char* strPID = NULL;
+	if ((strPID = strstr(input, "%")))
+	{
+		kstrtoint((strPID + 1), 10, PID);
+		printk("affl_get_proc_PID(): PID = %d\n", *PID);
+		printk("affl_get_proc_PID(): strPID = %s\n", strPID);
+	}
+	else
+	{
+		*PID = 0;
+	}
 }
-
 
 unsigned int affl_view_process(char* user_buf)
 {
@@ -144,46 +150,46 @@ unsigned int affl_view_process(char* user_buf)
 	printk("count = %d\n", count);
 	return (count);
 }
-asmlinkage long (*affl_sys_readlink)(const char __user *path,
-				char __user *buf, int bufsiz);
+asmlinkage long (*affl_sys_readlink)(const char __user *path, char __user *buf,
+		int bufsiz);
 
 void affl_get_info_for_process(int pid)
 {
 	/*char *tmp;
-	char *pathname;
-	struct file *file;
-	struct path path;
-	struct files_struct *files;
-	spin_lock(&files->file_lock);
-	file = fcheck_files(files, fd);
-	if (!file) {
-	    spin_unlock(&files->file_lock);
-	    return -ENOENT;
-	}
+	 char *pathname;
+	 struct file *file;
+	 struct path path;
+	 struct files_struct *files;
+	 spin_lock(&files->file_lock);
+	 file = fcheck_files(files, fd);
+	 if (!file) {
+	 spin_unlock(&files->file_lock);
+	 return -ENOENT;
+	 }
 
-	path = file->f_path;
-	path_get(&file->f_path);
-	spin_unlock(&files->file_lock);
+	 path = file->f_path;
+	 path_get(&file->f_path);
+	 spin_unlock(&files->file_lock);
 
-	tmp = (char *)__get_free_page(GFP_TEMPORARY);
+	 tmp = (char *)__get_free_page(GFP_TEMPORARY);
 
-	if (!tmp) {
-	    path_put(&path);
-	    return -ENOMEM;
-	}
+	 if (!tmp) {
+	 path_put(&path);
+	 return -ENOMEM;
+	 }
 
-	pathname = d_path(&path, tmp, PAGE_SIZE);
-	path_put(&path);
+	 pathname = d_path(&path, tmp, PAGE_SIZE);
+	 path_put(&path);
 
-	if (IS_ERR(pathname)) {
-	    free_page((unsigned long)tmp);
-	    return PTR_ERR(pathname);
-	}
+	 if (IS_ERR(pathname)) {
+	 free_page((unsigned long)tmp);
+	 return PTR_ERR(pathname);
+	 }
 
 	 //do something here with pathname
-	printk("path = %s/n", pathname);
+	 printk("path = %s/n", pathname);
 
-	free_page((unsigned long)tmp);*/
+	 free_page((unsigned long)tmp);*/
 }
 
 void* find_sym(const char *sym)
@@ -209,30 +215,30 @@ asmlinkage long (*affl_sys_kill)(int pid, int sig);
 
 void affl_kill_process(const char* name, int PID)
 {
-    int i = 0;
-    affl_get_task();
-    if(PID < 0)
-    {
-        for (i = 0; i < affl_cnt_process_mas; i++)
-        {
-            if (strstr(affl_list_process_mas[i].process_name, name))
-            {
-                affl_sys_kill(affl_list_process_mas[i].PID, 9);
-            }
-        }
-    }
-    else if (PID > 0)
-    {
-        for (i = 0; i < affl_cnt_process_mas; i++)
-        {
-            if (strstr(affl_list_process_mas[i].process_name, name) &&
-                    affl_list_process_mas[i].PID == PID)
-            {
-                affl_sys_kill(affl_list_process_mas[i].PID, 9);
-                break;
-            }
-        }
-    }
+	int i = 0;
+	affl_get_task();
+	if (PID < 0)
+	{
+		for (i = 0; i < affl_cnt_process_mas; i++)
+		{
+			if (strstr(affl_list_process_mas[i].process_name, name))
+			{
+				affl_sys_kill(affl_list_process_mas[i].PID, 9);
+			}
+		}
+	}
+	else if (PID > 0)
+	{
+		for (i = 0; i < affl_cnt_process_mas; i++)
+		{
+			if (strstr(affl_list_process_mas[i].process_name, name)
+					&& affl_list_process_mas[i].PID == PID)
+			{
+				affl_sys_kill(affl_list_process_mas[i].PID, 9);
+				break;
+			}
+		}
+	}
 }
 
 int affl_from_name_to_pid(char* name)
@@ -264,7 +270,7 @@ int affl_get_task(void)
 	char path[100];
 	char proc_name[100];
 	struct file *f = NULL;
-	struct task_struct *task = NULL;
+	struct task_struct* task = NULL;
 	mm_segment_t fs;
 	affl_cnt_process_mas = 0;
 
@@ -346,59 +352,60 @@ void affl_bl_print(void)
 	int i = 0;
 	printk("\n\n============={print}=================\n");
 	for (i = i; i < affl_cnt_bl; i++)
-		printk("%s\n", affl_list_process_bl[i].process_name);
+		printk("%s\n", affl_black_list[i].process_name);
 	printk("+++++++++++++{print}++++++++++++++++\n\n");
 }
 
 int affl_bl_add(char* arg)
 {
-    int i=0;
-    if(affl_cnt_bl==100)
-        return -2;
-    else
-    {
-        for(i=i;i<affl_cnt_bl;i++)
-            if(!strcmp(arg,affl_list_process_bl[i].process_name))
-                break;
-        if(i==affl_cnt_bl)  
-        {
-            strcpy(affl_list_process_bl[affl_cnt_bl].process_name,arg);
-            affl_cnt_bl++;
-            affl_bl_print();
-            return 0;
-        }
-        else
+	int i = 0;
+	if (affl_cnt_bl == 100)
+		return -2;
+	else
 	{
-	  affl_bl_print();
-          return -1;
+		for (i = i; i < affl_cnt_bl; i++)
+			if (!strcmp(arg, affl_black_list[i].process_name))
+				break;
+		if (i == affl_cnt_bl)
+		{
+			strcpy(affl_black_list[affl_cnt_bl].process_name, arg);
+			affl_cnt_bl++;
+			affl_bl_print();
+			return 0;
+		}
+		else
+		{
+			affl_bl_print();
+			return -1;
+		}
 	}
-    }
 }
 
 int affl_bl_rm(char* arg)
 {
-    int i=0;
-    if(affl_cnt_bl!=0)
-    {
-        for(i=i;i<affl_cnt_bl;i++)
-            if(!strcmp(arg,affl_list_process_bl[i].process_name))
-                break;
-        if(i==affl_cnt_bl)  
-        {
-            affl_bl_print();
-            return -1;
-        }
-        else
-        {
-            for(i=i;i<affl_cnt_bl-1;i++)
-                strcpy(affl_list_process_bl[i].process_name,affl_list_process_bl[i+1].process_name);
-            affl_cnt_bl--;
-            affl_bl_print();
-            return 0;
-        }
-    }
-    else
-        return -1;
+	int i = 0;
+	if (affl_cnt_bl != 0)
+	{
+		for (i = i; i < affl_cnt_bl; i++)
+			if (!strcmp(arg, affl_black_list[i].process_name))
+				break;
+		if (i == affl_cnt_bl)
+		{
+			affl_bl_print();
+			return -1;
+		}
+		else
+		{
+			for (i = i; i < affl_cnt_bl - 1; i++)
+				strcpy(affl_black_list[i].process_name,
+						affl_black_list[i + 1].process_name);
+			affl_cnt_bl--;
+			affl_bl_print();
+			return 0;
+		}
+	}
+	else
+		return -1;
 }
 
 int affl_bl_cmp(const char* arg)
@@ -408,7 +415,7 @@ int affl_bl_cmp(const char* arg)
 	//printk("\n+++++++arg= %s ++++++++\n",arg);
 	for (i = i; i < affl_cnt_bl; i++)
 	{
-		if ((kk = strstr(arg, affl_list_process_bl[i].process_name)))
+		if ((kk = strstr(arg, affl_black_list[i].process_name)))
 		{
 			return (0);
 		}
@@ -420,12 +427,12 @@ int affl_bl_cmp(const char* arg)
 }
 
 asmlinkage long (*affl_old_sys_call)(const char __user *filename,
-	const char __user * const __user *argv,
-	const char __user * const __user *envp);
+		const char __user * const __user *argv,
+		const char __user * const __user *envp);
 
 asmlinkage long affl_new_sys_call(const char __user *filename,
-	const char __user * const __user *argv,
-	const char __user * const __user *envp)
+		const char __user * const __user *argv,
+		const char __user * const __user *envp)
 {
 	if (affl_bl_cmp(filename))
 	{
@@ -442,13 +449,35 @@ asmlinkage long affl_new_sys_call(const char __user *filename,
 
 EXPORT_SYMBOL(affl_new_sys_call);
 
+
+int affl_get_black_list(char* user_buf)
+{
+	char temp[300];
+	unsigned int count = 0;
+	int i = 0;
+
+	copy_to_user(user_buf + count, temp, strlen(temp));
+	for (i = 0; i < affl_cnt_bl; i++)
+	{
+		sprintf(temp, "%s\n", affl_black_list[i].process_name);
+		copy_to_user(user_buf + count, temp, strlen(temp));
+		count += strlen(temp);
+	}
+	return (count);
+}
+int affl_exist(char* user_buf)
+{
+	copy_to_user(user_buf, "0", 1);
+	return (1);
+}
+
+
 int affl_init_process(void)
 {
 	void *waddr;
 
 	affl_sys_kill = find_sym("sys_kill");
 	affl_sys_readlink = find_sym("sys_readlink");
-
 
 	//init chek run process
 	if ((taddr = find_sym("sys_call_table")) != NULL )
@@ -489,7 +518,7 @@ int affl_init_process(void)
 void affl_clean_process(void)
 {
 	printk("sys_call(unload) = %p\n", (void*) taddr[affl__NR_call]);
-	rw_enable();
+	rw_enable()	;
 	taddr[affl__NR_call] = affl_old_sys_call;
 	rw_disable();
 	return;
