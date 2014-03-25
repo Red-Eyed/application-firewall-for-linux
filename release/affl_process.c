@@ -455,8 +455,9 @@ int affl_get_black_list(char* user_buf)
 	char temp[300];
 	unsigned int count = 0;
 	int i = 0;
-
-	copy_to_user(user_buf + count, temp, strlen(temp));
+	sprintf(temp, "%d\n", affl_cnt_bl);
+	count += strlen(temp);
+	copy_to_user(user_buf, temp, strlen(temp));
 	for (i = 0; i < affl_cnt_bl; i++)
 	{
 		sprintf(temp, "%s\n", affl_black_list[i].process_name);
