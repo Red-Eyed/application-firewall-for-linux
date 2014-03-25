@@ -352,6 +352,7 @@ void affl_bl_print(void)
 
 int affl_bl_add(char* arg)
 {
+    int i=0;
     if(affl_cnt_bl==100)
         return -2;
     else
@@ -367,8 +368,10 @@ int affl_bl_add(char* arg)
             return 0;
         }
         else
-            return -1;
-        affl_bl_print();
+	{
+	  affl_bl_print();
+          return -1;
+	}
     }
 }
 
