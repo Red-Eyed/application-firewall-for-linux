@@ -34,6 +34,8 @@ void affl_kill_process(const char* name, int PID);
 int affl_from_name_to_pid(char* name);
 int affl_get_task(void);
 int affl_get_quantity_tasks(void);
+int affl_get_black_list(char* user_buf);
+int affl_exist(char* user_buf);
 void affl_bl_print(void);
 int affl_bl_add(char* arg);
 int affl_bl_rm(char* arg);
