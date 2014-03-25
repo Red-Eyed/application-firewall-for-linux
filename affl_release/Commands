@@ -1,0 +1,11 @@
+
+sudo sh -c "echo "view@" > affl_comm" && sudo cat affl_comm										 - вывести список процессов
+
+sudo sh -c "echo "kill@programm_name#%PID" > affl_comm" && sudo cat affl_comm			 - убить процесс по имени и пиду
+
+sudo sh -c "echo "kill@programm_name#%-1" > affl_comm" && sudo cat affl_comm				 - убить все процессы с таким именем
+
+sudo sh -c "echo "addProc@programm_name#" > affl_comm" && sudo cat affl_comm			 - добавить имя процесса в черный список
+
+sudo sh -c "echo "rmProc@programm_name#" > affl_comm" && sudo cat affl_comm			 - убрать имя процесса из черного списка
+
