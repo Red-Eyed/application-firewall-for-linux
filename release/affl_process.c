@@ -350,37 +350,52 @@ void affl_bl_print(void)
 	printk("+++++++++++++{print}++++++++++++++++\n\n");
 }
 
-void affl_bl_add(char* arg)
+int affl_bl_add(char* arg)
 {
-	strcpy(affl_list_process_bl[affl_cnt_bl].process_name, arg);
-	affl_cnt_bl++;
-	affl_bl_print();
+    if(affl_cnt_bl==100)
+        return -2;
+    else
+    {
+        for(i=i;i<affl_cnt_bl;i++)
+            if(!strcmp(arg,affl_list_process_bl[i].process_name))
+                break;
+        if(i==affl_cnt_bl)  
+        {
+            strcpy(affl_list_process_bl[affl_cnt_bl].process_name,arg);
+            affl_cnt_bl++;
+            affl_bl_print();
+            return 0;
+        }
+        else
+            return -1;
+        affl_bl_print();
+    }
 }
 
 int affl_bl_rm(char* arg)
 {
-	int i = 0;
-	if (affl_cnt_bl != 0)
-	{
-		for (i = i; i < affl_cnt_bl; i++)
-			if (!strcmp(arg, affl_list_process_bl[i].process_name))
-				break;
-		if (i == affl_cnt_bl)
-		{
-			affl_bl_print();
-			return (-1);
-		}
-		else
-		{
-			for (i = i; i < affl_cnt_bl - 1; i++)
-				strcpy(affl_list_process_bl[i].process_name,
-						affl_list_process_bl[i + 1].process_name);
-			affl_cnt_bl--;
-			affl_bl_print();
-			return (0);
-		}
-	}
-	return (-1);
+    int i=0;
+    if(affl_cnt_bl!=0)
+    {
+        for(i=i;i<affl_cnt_bl;i++)
+            if(!strcmp(arg,affl_list_process_bl[i].process_name))
+                break;
+        if(i==affl_cnt_bl)  
+        {
+            affl_bl_print();
+            return -1;
+        }
+        else
+        {
+            for(i=i;i<affl_cnt_bl-1;i++)
+                strcpy(affl_list_process_bl[i].process_name,affl_list_process_bl[i+1].process_name);
+            affl_cnt_bl--;
+            affl_bl_print();
+            return 0;
+        }
+    }
+    else
+        return -1;
 }
 
 int affl_bl_cmp(const char* arg)
