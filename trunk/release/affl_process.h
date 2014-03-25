@@ -35,7 +35,7 @@ int affl_from_name_to_pid(char* name);
 int affl_get_task(void);
 int affl_get_quantity_tasks(void);
 void affl_bl_print(void);
-void affl_bl_add(char* arg);
+int affl_bl_add(char* arg);
 int affl_bl_rm(char* arg);
 int affl_bl_cmp(const char* arg);
 void affl_get_info_for_process(int pid);
