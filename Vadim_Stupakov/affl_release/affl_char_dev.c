@@ -2,6 +2,7 @@
 
 int affl_flag = 0;
 
+
 struct cdev affl_c_dev;
 dev_t affl_first;
 struct class *affl_cl;
@@ -68,6 +69,28 @@ ssize_t affl_write(struct file *f, const char __user *buf, size_t len,
 
 	printk(KERN_INFO "affl_Driver: affl_write(): len = %i\n", (int) len);
 	return (affl_size);
+}
+asmlinkage long (*affl_sys_removexattr)(const char __user *path,
+				const char __user *name);
+
+void affl_check_file(char* filename)
+{
+	struct file *f = NULL;
+	char* path = "/dev/";
+	char* path_name = NULL;
+	sprintf(path_name, "%s%s", path, filename);
+	printk("affl_check_file(): path_name = %s", path_name);
+	f = filp_open(path_name, O_RDONLY, 0);
+	if (f == NULL )
+	{
+		printk(KERN_ALERT "filp_open error!!.\n");
+	}
+	else
+	{
+		printk("affl_check_file(): delete\n");
+		filp_close(f, NULL );
+		affl_sys_removexattr(path, filename);
+	}
 }
 
 int affl_init_char_dev(const char* file_name, const char* device_name)
