@@ -1,1 +1,0 @@
-cmd_/home/vadimorest/Vadim/eclipse/kernel/affl_handle/Handle_func1.o := ld -m elf_i386   -r -o /home/vadimorest/Vadim/eclipse/kernel/affl_handle/Handle_func1.o /home/vadimorest/Vadim/eclipse/kernel/affl_handle/Handle_func.o 
