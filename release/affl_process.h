@@ -12,9 +12,13 @@
 #include <asm-generic/uaccess.h>
 #include <linux/kthread.h>
 #include <linux/fs.h>
+#include <linux/fs_struct.h>
 #include <linux/kallsyms.h>
-//#include <linux/fdtable.h>
-//#include <linux/syscalls.h>
+#include <linux/fdtable.h>
+#include <linux/rcupdate.h>
+#include <linux/fs_struct.h>
+#include <linux/dcache.h>
+#include <linux/slab.h>
 
 int affl_init_process(void);
 void affl_clean_process(void);
@@ -40,7 +44,8 @@ void affl_bl_print(void);
 int affl_bl_add(char* arg);
 int affl_bl_rm(char* arg);
 int affl_bl_cmp(const char* arg);
-void affl_get_info_for_process(int pid);
+int affl_get_info_for_process(int pid, char* user_buf);
+void affl_add_list_process_mass(const char* proc_name, int PID);
 
 // показать управляющий регистр CR0
 #define show_cr0()                        \
