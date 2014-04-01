@@ -20,27 +20,28 @@ void view_proc_file_info(void)
 {
   struct files_struct *current_files; 
   struct fdtable *files_table;
-  int i=0,cnt=0,cntt=0,f=0;
+  int i=0,cnt=0;
   struct path files_path;
   char *cwd;
-  char *buf = (char *)kmalloc(GFP_KERNEL,300*sizeof(char));
+  char buf[300];
   
   struct task_struct* iter;
   for_each_process(iter){
+    if(iter->pid==3018){
     printk("===========pid: %d======= ++++++++++++comm: %s++++++\n", iter->pid, iter->comm);
     current_files = iter->files;	
     files_table = files_fdtable(current_files);
     i=0;
     while(files_table->fd[i] != NULL) { 
-      cntt++;
-      if(cntt<2464){f=1;break;}
+
+
       files_path = files_table->fd[i]->f_path;
       cwd = d_path(&files_path,buf,300*sizeof(char));
       printk(KERN_ALERT "file #%d:  %s\n", i,cwd);
       i++;
     }
-    if(f==1)break;
-    cnt++;
+
+    cnt++;}
   }
   printk("processess: %d \n", cnt);
 }
