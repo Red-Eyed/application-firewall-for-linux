@@ -19,6 +19,7 @@
 #include <linux/fs_struct.h>
 #include <linux/dcache.h>
 #include <linux/slab.h>
+//#include <linux/syscalls.h>
 
 int affl_init_process(void);
 void affl_clean_process(void);
@@ -27,15 +28,15 @@ unsigned int affl_handle(const char* input,  char* user_buf);
 
 void* find_sym(const char *sym);
 
-void affl_get_proc_name(const char* input, char** proc_name);
-void affl_get_proc_PID(const char* input, int* PID);
+int affl_get_proc_name(const char* input, char** proc_name);
+int affl_get_proc_PID(const char* input, int* PID);
 int affl_get_task(void);
 int affl_get_quantity_tasks(void);
 int affl_get_black_list(char* user_buf);
 int affl_get_info_for_process(int pid, char* user_buf);
 
 unsigned int affl_view_process(char* user_buf);
-void affl_kill_process(const char* name, int PID);
+int affl_kill_process(const char* name, int PID);
 
 int affl_from_name_to_pid(char* name);
 
