@@ -15,7 +15,7 @@ else
 all : 
 # run kernel build system to make module
 	$(MAKE) -C $(BUILDSYSTEM_DIR) M=$(PWD) modules
-	rm *o *.mod.c *.order *.symvers *.cmd
+	rm *.o *.mod.c *.order *.symvers 
 clean:
 # run kernel build system to cleanup in current directory
 	rm *.ko
