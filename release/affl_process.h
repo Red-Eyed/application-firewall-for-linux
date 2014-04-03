@@ -3,23 +3,10 @@
 #define AFFL_PROCESS_H_
 
 #include <linux/cdev.h>
-//#include <linux/kdev_t.h>
-//#include <linux/string.h>
-//#include <linux/vmalloc.h>
-//#include <linux/export.h>
-//#include <linux/kernel.h>
-//#include <linux/sched.h>
 #include <asm-generic/uaccess.h>
-//#include <linux/kthread.h>
-//#include <linux/fs.h>
-//#include <linux/fs_struct.h>
 #include <linux/kallsyms.h>
 #include <linux/fdtable.h>
-//#include <linux/rcupdate.h>
 #include <linux/fs_struct.h>
-//#include <linux/dcache.h>
-//#include <linux/slab.h>
-//#include <linux/syscalls.h>
 
 int affl_init_process(void);
 void affl_clean_process(void);
