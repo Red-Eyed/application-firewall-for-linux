@@ -54,7 +54,8 @@ unsigned int affl_handle(const char* input, char* user_buf)
 		printk("affl_Driver: affl_handle(): command =  kill\n");
 		//Handle atribute
 		affl_get_proc_name(input, &proc_name);
-		if(!affl_get_proc_PID(input, &PID))
+		affl_get_proc_PID(input, &PID);
+		if(!affl_kill_process(proc_name, PID))
 		{
 			count_of_symbols = 1;
 			copy_to_user(user_buf, "0", count_of_symbols);
@@ -64,7 +65,7 @@ unsigned int affl_handle(const char* input, char* user_buf)
 			count_of_symbols = 2;
 			copy_to_user(user_buf, "-1", count_of_symbols);
 		}
-		affl_kill_process(proc_name, PID);
+		printk("PID = %d, proc_name = %s\n", PID, proc_name);
 	}
 	//Handle command getInfo
 	else if (strstr(input, affl_getInfo))
@@ -126,10 +127,10 @@ int affl_get_proc_name(const char* input, char** proc_name)
 {
 	char* begin = NULL;
 	char* end = NULL;
-	if (strstr(input, "@"))
+	if (strchr(input, '@'))
 	{
-		begin = strstr(input, "@");
-		end = strstr(input, "#");
+		begin = strchr(input, '@');
+		end = strchr(input, '#');
 		begin++;
 		*proc_name = vmalloc(end - begin);
 		memcpy(*proc_name, begin, (size_t) (end - begin));
@@ -141,12 +142,15 @@ int affl_get_proc_name(const char* input, char** proc_name)
 int affl_get_proc_PID(const char* input, int* PID)
 {
 	char* strPID = NULL;
-	if ((strPID = strstr(input, "%")))
+	if ((strPID = strchr(input, '%')))
 	{
 		kstrtoint((strPID + 1), 10, PID);
 		return (0);
 	}
-	return (-1);
+	else
+	{
+		return (-1);
+	}
 }
 
 unsigned int affl_view_process(char* user_buf)
@@ -214,7 +218,6 @@ int affl_get_info_for_process(int pid, char* user_buf)
 					break;
 				}
 			}
-
 			//print commandline////////////////////////////////////////////////
 			sprintf(path, "/proc/%d/cmdline", pid);
 			f = filp_open(path, O_RDONLY, 0);
@@ -225,13 +228,13 @@ int affl_get_info_for_process(int pid, char* user_buf)
 			else
 			{
 				// Get current segment descriptor
-				//fs = get_fs();
+				fs = get_fs();
 				// Set segment descriptor associated to kernel space
-				//set_fs(get_ds());
+				set_fs(get_ds());
 				// Read the file
 				f->f_op->read(f, cmdline, 100, &f->f_pos);
 				// Restore segment descriptor
-				//set_fs(fs);
+				set_fs(fs);
 				//printk("affl_Driver: affl_handle(): proc_name = %s\n", proc_name);
 			}
 			filp_close(f, NULL );
@@ -298,7 +301,6 @@ int affl_kill_process(const char* name, int PID)
 	int flag = 0;
 	int i = 0;
 	affl_get_task();
-
 	if (PID < 0)
 	{
 		for (i = 0; i < affl_cnt_process_mas; i++)
@@ -323,7 +325,7 @@ int affl_kill_process(const char* name, int PID)
 		for (i = 0; i < affl_cnt_process_mas; i++)
 		{
 			if (strstr(affl_list_process_mas[i].process_name, name)
-					&& affl_list_process_mas[i].PID == PID)
+					|| affl_list_process_mas[i].PID == PID)
 			{
 				affl_sys_kill(affl_list_process_mas[i].PID, 9);
 				flag++;
@@ -339,7 +341,10 @@ int affl_kill_process(const char* name, int PID)
 			return (-1);
 		}
 	}
-	return (-1);
+	else
+	{
+		return (-1);
+	}
 }
 
 int affl_from_name_to_pid(char* name)
@@ -399,15 +404,16 @@ int affl_get_task(void)
 
 			if(strlen(proc_name) > (TASK_COMM_LEN-1))
 			{
+				strcpy(cmdlineProc_name, proc_name);
 				if(strrchr(proc_name, '/'))
 				{
 					strcpy(cmdlineProc_name, strrchr(proc_name, '/') + 1);
-					affl_add_list_process_mass(cmdlineProc_name, task->pid);
 				}
-				else
+				if(strchr(cmdlineProc_name, ' '))
 				{
-					affl_add_list_process_mass(proc_name, task->pid);
+					cmdlineProc_name [strchr(cmdlineProc_name, ' ') - cmdlineProc_name] = 0;
 				}
+				affl_add_list_process_mass(cmdlineProc_name, task->pid);
 			}
 			else if(strlen(proc_name) < (TASK_COMM_LEN-1))
 			{
