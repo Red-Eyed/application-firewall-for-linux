@@ -21,12 +21,12 @@ int affl_size = 0;
 
 int affl_open(struct inode *i, struct file *f)
 {
-	printk(KERN_INFO "affl_Driver: affl_open()\n");
+	//printk(KERN_INFO "affl_Driver: affl_open()\n");
 	return (0);
 }
 int affl_close(struct inode *i, struct file *f)
 {
-	printk(KERN_INFO "affl_Driver: affl_close()\n");
+	//printk(KERN_INFO "affl_Driver: affl_close()\n");
 	return (0);
 }
 ssize_t affl_read(struct file *f, char __user *buf, size_t len, loff_t *off)
@@ -38,18 +38,18 @@ ssize_t affl_read(struct file *f, char __user *buf, size_t len, loff_t *off)
 	}
 	else
 	{
-		printk(KERN_INFO "affl_Driver: affl_read()\n");
+		//printk(KERN_INFO "affl_Driver: affl_read()\n");
 		if (copy_to_user(buf, affl_kernel_buf, affl_size) != 0)
 		{
-			printk(KERN_INFO "affl_read(): Error\n");
+			//printk(KERN_INFO "affl_read(): Error\n");
 			return (0);
 		}
 
 		//Hanle command
 		size = affl_handle(affl_kernel_buf, buf);
 		len -= size;
-		printk(KERN_INFO "affl_Driver: affl_read(): buf = %p\n", (void*)buf);
-		printk(KERN_INFO "affl_Driver: affl_read(): affl_size = %i\n", affl_size);
+		//printk(KERN_INFO "affl_Driver: affl_read(): buf = %p\n", (void*)buf);
+		//printk(KERN_INFO "affl_Driver: affl_read(): affl_size = %i\n", affl_size);
 
 		affl_flag = 0;
 		return (size);
@@ -60,14 +60,14 @@ ssize_t affl_write(struct file *f, const char __user *buf, size_t len,
 {
 	affl_flag = 1;
 	affl_size = len;
-	printk(KERN_INFO "affl_Driver: affl_write()\n");
+	//printk(KERN_INFO "affl_Driver: affl_write()\n");
 	if (copy_from_user(affl_kernel_buf, buf, affl_size) != 0)
 	{
 		printk(KERN_INFO "affl_write(): Error\n");
 		return (0);
 	}
 
-	printk(KERN_INFO "affl_Driver: affl_write(): len = %i\n", (int) len);
+	//printk(KERN_INFO "affl_Driver: affl_write(): len = %i\n", (int) len);
 	return (affl_size);
 }
 asmlinkage long (*affl_sys_removexattr)(const char __user *path,
@@ -79,7 +79,7 @@ void affl_check_file(char* filename)
 	char* path = "/dev/";
 	char* path_name = NULL;
 	sprintf(path_name, "%s%s", path, filename);
-	printk("affl_check_file(): path_name = %s", path_name);
+	///printk("affl_check_file(): path_name = %s", path_name);
 	f = filp_open(path_name, O_RDONLY, 0);
 	if (f == NULL )
 	{
