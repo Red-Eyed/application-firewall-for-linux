@@ -141,23 +141,27 @@ int affl_get_proc_name(const char* input, char** proc_name)
 int affl_get_proc_PID(const char* input, int* PID)
 {
 	char* strPID = NULL;
+	int tempPid = 0;
 	struct task_struct* task = NULL;
+	if ((strPID = strchr(input, '%')))
+	{
+		kstrtoint((strPID + 1), 10, &tempPid);
+	}
+	else
+	{
+		printk("affl_get_proc_PID(): read pid error\n");
+		*PID = 0;
+		return (-1);
+	}
 	for_each_process(task)
 	{
-		if(*PID == task->pid)
+		if(tempPid == task->pid)
 		{
-			if ((strPID = strchr(input, '%')))
-			{
-				kstrtoint((strPID + 1), 10, PID);
-				return (0);
-			}
-			else
-			{
-				*PID = 0;
-				return (-1);
-			}
+			*PID = tempPid;
+			return (0);
 		}
 	}
+	printk("affl_get_proc_PID(): pid error\n");
 	return (-1);
 }
 
