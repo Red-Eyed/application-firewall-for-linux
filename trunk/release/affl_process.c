@@ -54,7 +54,7 @@ unsigned int affl_handle(const char* input, char* user_buf)
 		//Handle atribute
 		affl_get_proc_name(input, &proc_name);
 		affl_get_proc_PID(input, &PID);
-		if(!affl_kill_process(proc_name, PID))
+		if (!affl_kill_process(proc_name, PID))
 		{
 			count_of_symbols = 1;
 			copy_to_user(user_buf, "0", count_of_symbols);
@@ -141,15 +141,24 @@ int affl_get_proc_name(const char* input, char** proc_name)
 int affl_get_proc_PID(const char* input, int* PID)
 {
 	char* strPID = NULL;
-	if ((strPID = strchr(input, '%')))
+	struct task_struct* task = NULL;
+	for_each_process(task)
 	{
-		kstrtoint((strPID + 1), 10, PID);
-		return (0);
+		if(*PID == task->pid)
+		{
+			if ((strPID = strchr(input, '%')))
+			{
+				kstrtoint((strPID + 1), 10, PID);
+				return (0);
+			}
+			else
+			{
+				*PID = 0;
+				return (-1);
+			}
+		}
 	}
-	else
-	{
-		return (-1);
-	}
+	return (-1);
 }
 
 unsigned int affl_view_process(char* user_buf)
@@ -180,96 +189,105 @@ unsigned int affl_view_process(char* user_buf)
 
 int affl_get_info_for_process(int pid, char* user_buf)
 {
-	struct file *f = NULL;
-	mm_segment_t fs;
-	char path[100];
-	char temp[100];
-	char cmdline[100];
 	unsigned int count = 0;
-	int i = 0;
-	struct files_struct *current_files = NULL;
-	struct fdtable *files_table = NULL;
-	struct path files_path;
-	char *cwd = NULL;
-	char buf[300];
-	struct task_struct* task = NULL;
-
-	memset(temp, 0, 100);
-	memset(path, 0, 100);
-	memset(cmdline, 0, 100);
-	memset(buf, 0, 300);
-
-	affl_get_task();
-
-	for_each_process(task)
+	if (pid != 0)
 	{
-		if (task->pid == pid)
-		{
-			//Print PID and name///////////////////////////////////////////////
-			for(i = 0; i < affl_cnt_process_mas; i++)
-			{
-				if(affl_list_process_mas[i].PID == pid)
-				{
-					sprintf(temp, "PID: %d Name %s\n", affl_list_process_mas[i].PID,
-							affl_list_process_mas[i].process_name);
-					copy_to_user(user_buf + count, temp, strlen(temp));
-					count += strlen(temp);
-					break;
-				}
-			}
-			//print commandline////////////////////////////////////////////////
-			sprintf(path, "/proc/%d/cmdline", pid);
-			f = filp_open(path, O_RDONLY, 0);
-			if (f == NULL )
-			{
-				printk(KERN_ALERT "filp_open error!!.\n");
-			}
-			else
-			{
-				// Get current segment descriptor
-				fs = get_fs();
-				// Set segment descriptor associated to kernel space
-				set_fs(get_ds());
-				// Read the file
-				f->f_op->read(f, cmdline, 100, &f->f_pos);
-				// Restore segment descriptor
-				set_fs(fs);
-				//printk("affl_Driver: affl_handle(): proc_name = %s\n", proc_name);
-			}
-			filp_close(f, NULL );
-			sprintf(temp,"Command line: %s\n", cmdline);
-			copy_to_user(user_buf + count, temp, strlen(temp));
-			count += strlen(temp);
+		struct file *f = NULL;
+		mm_segment_t fs;
+		char path[100];
+		char temp[100];
+		char cmdline[100];
+		int i = 0;
+		struct files_struct *current_files = NULL;
+		struct fdtable *files_table = NULL;
+		struct path files_path;
+		char *cwd = NULL;
+		char buf[300];
+		struct task_struct* task = NULL;
 
-			//print files///////////////////////////////////////////////////////
-			sprintf(temp,"Files:\nN  File\n");
-			copy_to_user(user_buf + count, temp, strlen(temp));
-			count += strlen(temp);
-			current_files = task->files;
-			files_table = files_fdtable(current_files);
-			i = 0;
-			while (files_table->fd[i] != NULL )
+		memset(temp, 0, 100);
+		memset(path, 0, 100);
+		memset(cmdline, 0, 100);
+		memset(buf, 0, 300);
+
+		affl_get_task();
+
+		for_each_process(task)
+		{
+			if (task->pid == pid)
 			{
-				files_path = files_table->fd[i]->f_path;
-				if(files_table->fd[i] == NULL) break;
-				cwd = d_path(&files_path, buf, 300 * sizeof(char));
-				sprintf(temp, "%d  %s\n", i, cwd);
+				//Print PID and name///////////////////////////////////////////////
+				for(i = 0; i < affl_cnt_process_mas; i++)
+				{
+					if(affl_list_process_mas[i].PID == pid)
+					{
+						sprintf(temp, "PID: %d Name %s\n", affl_list_process_mas[i].PID,
+								affl_list_process_mas[i].process_name);
+						copy_to_user(user_buf + count, temp, strlen(temp));
+						count += strlen(temp);
+						break;
+					}
+				}
+				//print commandline////////////////////////////////////////////////
+				sprintf(path, "/proc/%d/cmdline", pid);
+				f = filp_open(path, O_RDONLY, 0);
+				if (f == NULL )
+				{
+					printk(KERN_ALERT "filp_open error!!.\n");
+				}
+				else
+				{
+					// Get current segment descriptor
+					fs = get_fs();
+					// Set segment descriptor associated to kernel space
+					set_fs(get_ds());
+					// Read the file
+					f->f_op->read(f, cmdline, 100, &f->f_pos);
+					// Restore segment descriptor
+					set_fs(fs);
+					//printk("affl_Driver: affl_handle(): proc_name = %s\n", proc_name);
+				}
+				filp_close(f, NULL );
+				sprintf(temp,"Command line: %s\n", cmdline);
 				copy_to_user(user_buf + count, temp, strlen(temp));
 				count += strlen(temp);
-				i++;
+
+				//print files///////////////////////////////////////////////////////
+				sprintf(temp,"Files:\nN  File\n");
+				copy_to_user(user_buf + count, temp, strlen(temp));
+				count += strlen(temp);
+				current_files = task->files;
+				files_table = files_fdtable(current_files);
+				i = 0;
+				while (files_table->fd[i] != NULL )
+				{
+					files_path = files_table->fd[i]->f_path;
+					if(files_table->fd[i] == NULL) break;
+					cwd = d_path(&files_path, buf, 300 * sizeof(char));
+					sprintf(temp, "%d  %s\n", i, cwd);
+					copy_to_user(user_buf + count, temp, strlen(temp));
+					count += strlen(temp);
+					i++;
+				}
 			}
 		}
-	}
 
-	if (count)
-	{
-		return (count);
+		if (count)
+		{
+			return (count);
+		}
+		else
+		{
+			sprintf(temp, "-1");
+			copy_to_user(user_buf + count, temp, strlen(temp));
+			count += strlen(temp);
+			return (count);
+		}
 	}
 	else
 	{
-		sprintf(temp, "-1");
-		copy_to_user(user_buf + count, temp, strlen(temp));
-		count += strlen(temp);
+		count = 2;
+		copy_to_user(user_buf, "-1", count);
 		return (count);
 	}
 }
@@ -365,7 +383,8 @@ int affl_from_name_to_pid(char* name)
 	return (pid);
 }
 
-asmlinkage long (*affl_sys_readlink)(const char __user *path,char __user *buf, int bufsiz);
+asmlinkage long (*affl_sys_readlink)(const char __user *path, char __user *buf,
+		int bufsiz);
 
 int affl_get_task(void)
 {
@@ -450,7 +469,7 @@ int affl_bl_add(char* arg)
 			strcpy(affl_black_list[affl_cnt_bl].process_name, arg);
 			affl_cnt_bl++;
 			//affl_bl_print();
-			affl_kill_process(arg, -1);//if process exist - kill it
+			affl_kill_process(arg, -1); //if process exist - kill it
 			return 0;
 		}
 		else
@@ -528,8 +547,8 @@ int affl_get_black_list(char* user_buf)
 	unsigned int count = 0;
 	int i = 0;
 	sprintf(temp, "%d\n", affl_cnt_bl);
-	count += strlen(temp);
 	copy_to_user(user_buf + count, temp, strlen(temp));
+	count += strlen(temp);
 	for (i = 0; i < affl_cnt_bl; i++)
 	{
 		sprintf(temp, "%s\n", affl_black_list[i].process_name);
@@ -555,11 +574,11 @@ int affl_init_process(void)
 {
 	void *waddr;
 
-	//affl_sys_readlink=find_sym("sys_readlink");
+//affl_sys_readlink=find_sym("sys_readlink");
 	affl_sys_kill = find_sym("sys_kill");
 	affl_sys_readlink = find_sym("sys_readlink");
 
-	//init chek run process
+//init chek run process
 	if ((taddr = find_sym("sys_call_table")) != NULL )
 	{
 		printk("sys_call_table = %p\n", taddr);
@@ -586,21 +605,28 @@ int affl_init_process(void)
 		return (-EINVAL);
 	}
 	printk("new sys_call = %p\n", &affl_new_sys_call);
-	show_cr0();
-	rw_enable();
+	show_cr0()
+	;
+	rw_enable()
+	;
 	taddr[affl__NR_call] = affl_new_sys_call;
-	show_cr0();
-	rw_disable();
-	show_cr0();
-	/////////////////////////////////////////////////////////////////////
+	show_cr0()
+	;
+	rw_disable()
+	;
+	show_cr0()
+	;
+/////////////////////////////////////////////////////////////////////
 	return (0);
 }
 void affl_clean_process(void)
 {
 	printk("sys_call(unload) = %p\n", (void*) taddr[affl__NR_call]);
-	rw_enable();
+	rw_enable()
+	;
 	taddr[affl__NR_call] = affl_old_sys_call;
-	rw_disable();
+	rw_disable()
+	;
 	return;
 }
 #endif /* AFFL_PROCESS_C_ */
