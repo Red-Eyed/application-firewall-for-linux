@@ -44,7 +44,6 @@ unsigned int affl_handle(const char* input, char* user_buf)
 	{
 		//affl_view_process(user_buf);
 		count_of_symbols = affl_view_process(user_buf);
-		affl_get_task();
 		printk("affl_Driver: affl_handle(): view\n");
 	}
 
@@ -176,8 +175,8 @@ unsigned int affl_view_process(char* user_buf)
 	printk("count = %d\n", count);
 	return (count);
 }
-asmlinkage long (*affl_sys_readlink)(const char __user *path, char __user *buf,
-		int bufsiz);
+//asmlinkage long (*affl_sys_readlink)(const char __user *path, char __user *buf,
+//		int bufsiz);
 
 int affl_get_info_for_process(int pid, char* user_buf)
 {
@@ -366,63 +365,51 @@ int affl_from_name_to_pid(char* name)
 	return (pid);
 }
 
+asmlinkage long (*affl_sys_readlink)(const char __user *path,char __user *buf, int bufsiz);
+
 int affl_get_task(void)
 {
-	char path[100];
-	char proc_name[100];
-	char cmdlineProc_name[100];
-	struct file *f = NULL;
+	int symbol_size = 0;
+	char affl_path[50];
+	char affl_link_name_path[150];
 	struct task_struct* task = NULL;
-	mm_segment_t fs;
-	memset(cmdlineProc_name, 0, 100);
-	memset(path, 0, 100);
-	memset(proc_name, 0, 100);
-	affl_cnt_process_mas = 0;
-
+	mm_segment_t old_fs;
+	printk("affl_get_task()\n");
+	memset(affl_path, 0, 50);
+	memset(affl_link_name_path, 0, 150);
 	for_each_process(task)
 	{
-		if(strlen(task->comm) == (TASK_COMM_LEN-1))
+		if (strlen(task->comm) != (TASK_COMM_LEN - 1))
 		{
-			sprintf(path, "/proc/%d/cmdline", task->pid);
-			f = filp_open(path, O_RDONLY, 0);
-			if(f == NULL)
+			affl_add_list_process_mass(task->comm, task->pid);
+		}
+		else
+		{
+			sprintf(affl_path, "/proc/%d/exe", task->pid);
+			old_fs = get_fs();
+			set_fs(get_ds());
+
+			symbol_size = affl_sys_readlink(affl_path, affl_link_name_path, 150);
+
+			set_fs(old_fs);
+			affl_link_name_path[symbol_size] = 0;
+			if (symbol_size < 0)
 			{
-				printk(KERN_ALERT "filp_open error!!.\n");
+				printk("affl_get_task(): affl_sys_readlink() return ERROR\n");
+				affl_add_list_process_mass(task->comm, task->pid);
 			}
 			else
 			{
-				// Get current segment descriptor
-				fs = get_fs();
-				// Set segment descriptor associated to kernel space
-				set_fs(get_ds());
-				// Read the file
-				f->f_op->read(f, proc_name, 100, &f->f_pos);
-				// Restore segment descriptor
-				set_fs(fs);
-			}
-			filp_close(f,NULL);
-
-			if(strlen(proc_name) > (TASK_COMM_LEN-1))
-			{
-				strcpy(cmdlineProc_name, proc_name);
-				if(strrchr(proc_name, '/'))
+				if (symbol_size == 0)
 				{
-					strcpy(cmdlineProc_name, strrchr(proc_name, '/') + 1);
+					printk("affl_get_task(): affl_sys_readlink() return 0\n");
+					affl_add_list_process_mass(task->comm, task->pid);
 				}
-				if(strchr(cmdlineProc_name, ' '))
+				else
 				{
-					cmdlineProc_name [strchr(cmdlineProc_name, ' ') - cmdlineProc_name] = 0;
+					affl_add_list_process_mass(strrchr(affl_link_name_path, '/') + 1, task->pid);
 				}
-				affl_add_list_process_mass(cmdlineProc_name, task->pid);
 			}
-			else if(strlen(proc_name) < (TASK_COMM_LEN-1))
-			{
-				affl_add_list_process_mass(task->comm, task->pid);
-			}
-		}
-		else if(strlen(task->comm) < (TASK_COMM_LEN-1))
-		{
-			affl_add_list_process_mass(task->comm, task->pid);
 		}
 	}
 	return (0);
@@ -568,6 +555,7 @@ int affl_init_process(void)
 {
 	void *waddr;
 
+	//affl_sys_readlink=find_sym("sys_readlink");
 	affl_sys_kill = find_sym("sys_kill");
 	affl_sys_readlink = find_sym("sys_readlink");
 
