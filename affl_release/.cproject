@@ -28,7 +28,10 @@
 								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.exe.debug.option.optimization.level.1589314630" name="Optimization Level" superClass="gnu.c.compiler.exe.debug.option.optimization.level" valueType="enumerated"/>
 								<option id="gnu.c.compiler.exe.debug.option.debugging.level.1578258982" name="Debug Level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.583944887" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="/usr/src/linux-headers-3.11.0-17-generic/include"/>
+									<listOptionValue builtIn="false" value="/usr/src/linux-headers-3.11.0-18-generic/include"/>
+								</option>
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1732529448" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="for_each_process"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.536422015" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
