@@ -38,7 +38,7 @@ unsigned int affl_handle(const char* input, char* user_buf)
 	unsigned int count_of_symbols = 0;
 
 	printk("affl_Driver: affl_handle(): open\n");
-
+	printk("================%s===============",input);
 	//Handle command view
 	if (strstr(input, affl_view))
 	{
@@ -131,7 +131,8 @@ int affl_get_proc_name(const char* input, char** proc_name)
 		begin = strchr(input, '@');
 		end = strchr(input, '#');
 		begin++;
-		*proc_name = vmalloc(end - begin);
+		*proc_name = vmalloc(end - begin+1);
+		proc_name[end - begin+1]=0;
 		memcpy(*proc_name, begin, (size_t) (end - begin));
 		return (0);
 	}
