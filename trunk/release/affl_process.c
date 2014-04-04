@@ -348,7 +348,8 @@ int affl_kill_process(const char* name, int PID)
 	{
 		for (i = 0; i < affl_cnt_process_mas; i++)
 		{
-			if (strstr(affl_list_process_mas[i].process_name, name))
+			//if (strstr(affl_list_process_mas[i].process_name, name))
+			if (strcmp(affl_list_process_mas[i].process_name, name))
 			{
 				affl_sys_kill(affl_list_process_mas[i].PID, 9);
 				flag++;
