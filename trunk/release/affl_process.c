@@ -132,7 +132,7 @@ int affl_get_proc_name(const char* input, char** proc_name)
 		end = strchr(input, '#');
 		begin++;
 		*proc_name = vmalloc(end - begin+1);
-		proc_name[end - begin+1]=0;
+		*proc_name[end - begin]=0;
 		memcpy(*proc_name, begin, (size_t) (end - begin));
 		return (0);
 	}
