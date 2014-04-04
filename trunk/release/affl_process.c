@@ -140,12 +140,21 @@ int affl_get_proc_name(const char* input, char** proc_name)
 
 int affl_get_proc_PID(const char* input, int* PID)
 {
-	char* strPID = NULL;
+	char strPID[10];
 	int tempPid = 0;
 	struct task_struct* task = NULL;
-	if ((strPID = strchr(input, '%')))
+	char* temp = NULL;
+	int i = 0;
+	memset(strPID, 0, 10);
+	if ((temp = strchr(input, '%')))
 	{
-		kstrtoint((strPID + 1), 10, &tempPid);
+		temp++;
+		for(i = 0; (temp[i] >= 48 && temp[i] <= 57); i++ )
+		{
+			strPID[i] = temp[i];
+		}
+		//printk("\tstrPID = %s\n", strPID);
+		kstrtoint((strPID), 10, &tempPid);
 	}
 	else
 	{
@@ -158,6 +167,7 @@ int affl_get_proc_PID(const char* input, int* PID)
 		if(tempPid == task->pid)
 		{
 			*PID = tempPid;
+			printk("\nPID = %d\n", *PID);
 			return (0);
 		}
 	}
@@ -193,107 +203,110 @@ unsigned int affl_view_process(char* user_buf)
 
 int affl_get_info_for_process(int pid, char* user_buf)
 {
-	unsigned int count = 0;
-	if (pid != 0)
-	{
-		struct file *f = NULL;
-		mm_segment_t fs;
-		char path[100];
-		char temp[100];
-		char cmdline[100];
-		int i = 0;
-		struct files_struct *current_files = NULL;
-		struct fdtable *files_table = NULL;
-		struct path files_path;
-		char *cwd = NULL;
-		char buf[300];
-		struct task_struct* task = NULL;
-
-		memset(temp, 0, 100);
-		memset(path, 0, 100);
-		memset(cmdline, 0, 100);
-		memset(buf, 0, 300);
-
-		affl_get_task();
-
-		for_each_process(task)
+		unsigned int count = 0;
+		if (pid > 0)
 		{
-			if (task->pid == pid)
-			{
-				//Print PID and name///////////////////////////////////////////////
-				for(i = 0; i < affl_cnt_process_mas; i++)
-				{
-					if(affl_list_process_mas[i].PID == pid)
-					{
-						sprintf(temp, "PID: %d Name %s\n", affl_list_process_mas[i].PID,
-								affl_list_process_mas[i].process_name);
-						copy_to_user(user_buf + count, temp, strlen(temp));
-						count += strlen(temp);
-						break;
-					}
-				}
-				//print commandline////////////////////////////////////////////////
-				sprintf(path, "/proc/%d/cmdline", pid);
-				f = filp_open(path, O_RDONLY, 0);
-				if (f == NULL )
-				{
-					printk(KERN_ALERT "filp_open error!!.\n");
-				}
-				else
-				{
-					// Get current segment descriptor
-					fs = get_fs();
-					// Set segment descriptor associated to kernel space
-					set_fs(get_ds());
-					// Read the file
-					f->f_op->read(f, cmdline, 100, &f->f_pos);
-					// Restore segment descriptor
-					set_fs(fs);
-					//printk("affl_Driver: affl_handle(): proc_name = %s\n", proc_name);
-				}
-				filp_close(f, NULL );
-				sprintf(temp,"Command line: %s\n", cmdline);
-				copy_to_user(user_buf + count, temp, strlen(temp));
-				count += strlen(temp);
+			struct file *f = NULL;
+			mm_segment_t fs;
+			char path[100];
+			char temp[100];
+			char cmdline[100];
+			int i = 0;
+			struct files_struct *current_files = NULL;
+			struct fdtable *files_table = NULL;
+			struct path files_path;
+			char *cwd = NULL;
+			char buf[300];
+			struct task_struct* task = NULL;
 
-				//print files///////////////////////////////////////////////////////
-				sprintf(temp,"Files:\nN  File\n");
-				copy_to_user(user_buf + count, temp, strlen(temp));
-				count += strlen(temp);
-				current_files = task->files;
-				files_table = files_fdtable(current_files);
-				i = 0;
-				while (files_table->fd[i] != NULL )
+			memset(temp, 0, 100);
+			memset(path, 0, 100);
+			memset(cmdline, 0, 100);
+			memset(buf, 0, 300);
+
+			affl_get_task();
+
+			for_each_process(task)
+			{
+				if (task->pid == pid)
 				{
-					files_path = files_table->fd[i]->f_path;
-					if(files_table->fd[i] == NULL) break;
-					cwd = d_path(&files_path, buf, 300 * sizeof(char));
-					sprintf(temp, "%d  %s\n", i, cwd);
+					//Print PID and name///////////////////////////////////////////////
+					for(i = 0; i < affl_cnt_process_mas; i++)
+					{
+						if(affl_list_process_mas[i].PID == pid)
+						{
+							sprintf(temp, "PID: %d Name %s\n", affl_list_process_mas[i].PID,
+									affl_list_process_mas[i].process_name);
+							copy_to_user(user_buf + count, temp, strlen(temp));
+							count += strlen(temp);
+							break;
+						}
+					}
+					//print commandline////////////////////////////////////////////////
+					sprintf(path, "/proc/%d/cmdline", pid);
+					f = filp_open(path, O_RDONLY, 0);
+					if (f == NULL )
+					{
+						printk(KERN_ALERT "filp_open error!!.\n");
+					}
+					else
+					{
+						// Get current segment descriptor
+						fs = get_fs();
+						// Set segment descriptor associated to kernel space
+						set_fs(get_ds());
+						// Read the file
+						f->f_op->read(f, cmdline, 100, &f->f_pos);
+						// Restore segment descriptor
+						set_fs(fs);
+						//printk("affl_Driver: affl_handle(): proc_name = %s\n", proc_name);
+					}
+					filp_close(f, NULL );
+					sprintf(temp,"Command line: %s\n", cmdline);
 					copy_to_user(user_buf + count, temp, strlen(temp));
 					count += strlen(temp);
-					i++;
+
+					//print files///////////////////////////////////////////////////////
+					sprintf(temp,"Files:\nN  File\n");
+					copy_to_user(user_buf + count, temp, strlen(temp));
+					count += strlen(temp);
+					current_files = task->files;
+					files_table = files_fdtable(current_files);
+					i = 0;
+					while (files_table->fd[i] != NULL )
+					{
+						files_path = files_table->fd[i]->f_path;
+						if(files_table->fd[i] == NULL) break;
+						cwd = d_path(&files_path, buf, 300 * sizeof(char));
+						sprintf(temp, "%d  %s\n", i, cwd);
+						copy_to_user(user_buf + count, temp, strlen(temp));
+						count += strlen(temp);
+						i++;
+					}
 				}
 			}
-		}
 
-		if (count)
-		{
-			return (count);
+			if (count)
+			{
+				return (count);
+			}
+			else
+			{
+				sprintf(temp, "-1");
+				copy_to_user(user_buf + count, temp, strlen(temp));
+				count += strlen(temp);
+				return (count);
+			}
 		}
 		else
 		{
-			sprintf(temp, "-1");
-			copy_to_user(user_buf + count, temp, strlen(temp));
-			count += strlen(temp);
+			count = 2;
+			copy_to_user(user_buf, "-1", count);
 			return (count);
 		}
-	}
-	else
-	{
-		count = 2;
-		copy_to_user(user_buf, "-1", count);
-		return (count);
-	}
+	count = 2;
+	copy_to_user(user_buf, "-1", count);
+	return (count);
 }
 
 void* find_sym(const char *sym)
@@ -397,6 +410,7 @@ int affl_get_task(void)
 	char affl_link_name_path[150];
 	struct task_struct* task = NULL;
 	mm_segment_t old_fs;
+	affl_cnt_process_mas = 0;
 	printk("affl_get_task()\n");
 	memset(affl_path, 0, 50);
 	memset(affl_link_name_path, 0, 150);
