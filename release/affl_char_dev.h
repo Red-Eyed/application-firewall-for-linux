@@ -8,6 +8,7 @@
 #ifndef AFFL_CHAR_DEV_H_
 #define AFFL_CHAR_DEV_H_
 
+#include <linux/module.h>
 #include <linux/cdev.h>
 #include <linux/types.h>
 #include <linux/device.h>
