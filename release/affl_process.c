@@ -516,8 +516,7 @@ int affl_bl_rm(char* arg)
 				break;
 		if (i == affl_cnt_bl)
 		{
-			//affl_bl_print();
-			return -1;
+			return (-1);
 		}
 		else
 		{
@@ -525,12 +524,13 @@ int affl_bl_rm(char* arg)
 				strcpy(affl_black_list[i].process_name,
 						affl_black_list[i + 1].process_name);
 			affl_cnt_bl--;
-			//affl_bl_print();
-			return 0;
+			return (0);
 		}
 	}
 	else
-		return -1;
+	{
+		return (-1);
+	}
 }
 
 int affl_bl_cmp(const char* arg)
@@ -600,7 +600,6 @@ int affl_init_process(void)
 {
 	void *waddr;
 
-//affl_sys_readlink=find_sym("sys_readlink");
 	affl_sys_kill = find_sym("sys_kill");
 	affl_sys_readlink = find_sym("sys_readlink");
 
@@ -631,28 +630,21 @@ int affl_init_process(void)
 		return (-EINVAL);
 	}
 	printk("new sys_call = %p\n", &affl_new_sys_call);
-	show_cr0()
-	;
-	rw_enable()
-	;
+	show_cr0();
+	rw_enable();
 	taddr[affl__NR_call] = affl_new_sys_call;
-	show_cr0()
-	;
-	rw_disable()
-	;
-	show_cr0()
-	;
+	show_cr0();
+	rw_disable();
+	show_cr0();
 /////////////////////////////////////////////////////////////////////
 	return (0);
 }
 void affl_clean_process(void)
 {
 	printk("sys_call(unload) = %p\n", (void*) taddr[affl__NR_call]);
-	rw_enable()
-	;
+	rw_enable();
 	taddr[affl__NR_call] = affl_old_sys_call;
-	rw_disable()
-	;
+	rw_disable();
 	return;
 }
 #endif /* AFFL_PROCESS_C_ */
