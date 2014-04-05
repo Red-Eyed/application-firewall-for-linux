@@ -17,6 +17,7 @@ Widget::Widget(QWidget *parent) :
     lstbl<<"Process Name";
     ui->tableWidget->setHorizontalHeaderLabels(lst);
     ui->tableWidget_2->setHorizontalHeaderLabels(lstbl);
+    connect(ui->tableWidget,SIGNAL(cellClicked(int,int)),this,SLOT(getInfo(int,int)));
     //connect(ui->tableWidget,SIGNAL(cellEntered(int,int)),this,SLOT(changeloltest(int,int)));
     //======================================================================================
 
@@ -38,10 +39,12 @@ Widget::Widget(QWidget *parent) :
     exist=0;
     lockSlot=0;
     insmod();
+    update();
     //======================================================================================
     //===================set BL=============================================================
     int cntProc=-1,i=0;
-    char nameProc[50];
+    //char nameProc[50];
+    std::string nameProc;
     char charAnsver[50];
     QString ansver;
     std::fstream fib("bl",std::ios_base::in);
@@ -58,12 +61,12 @@ Widget::Widget(QWidget *parent) :
         ui->tableWidget_2->setRowCount(cntProc);
         for(i=i;i<cntProc;i++)
         {
-            fib.getline(nameProc,50);
+            fib>>nameProc;
             QString command="addProc@";
-            command+=QString(nameProc);
+            command+=QString(nameProc.c_str());
             command+="#";
             std::fstream fi("/dev/affl_comm",std::ios_base::out);
-            fi<<command.toStdString();
+            fi.write(command.toStdString().c_str(),command.length());
             fi.close();
             //====resive========================
 
@@ -78,11 +81,12 @@ Widget::Widget(QWidget *parent) :
 
             if(ansver=="0")
             {
-                ui->tableWidget_2->setItem(i,0,new QTableWidgetItem(nameProc));
+                ui->tableWidget_2->setItem(i,0,new QTableWidgetItem(nameProc.c_str()));
                 emit sendMesage("Comand addProc is execute");
             }
             fo.close();
         }
+        fib.close();
     }
     //======================================================================================
     emit sendMesage("Start System");
@@ -91,12 +95,13 @@ Widget::Widget(QWidget *parent) :
 Widget::~Widget()
 {
     int cntProc=-1,i=0;
-    char nameProc[50];
+    //char nameProc[50];
+    std::string nameProc;
     char c;
 
     QString command="getBL@";
     std::fstream fi("/dev/affl_comm",std::ios_base::out);
-    fi<<command.toStdString();
+    fi.write(command.toStdString().c_str(),command.length());
     fi.close();
 
     std::fstream fo("/dev/affl_comm",std::ios_base::in);
@@ -111,12 +116,15 @@ Widget::~Widget()
     {
         std::fstream fob("bl",std::ios_base::out);
         fob<<cntProc;
-        fo>>c;
-        fob<<c;
+        c=fo.get();
+        fob.put(c);
         for(i=i;i<cntProc;++i)
         {
             fo>>nameProc;
-            fob<<nameProc;
+            fob.write(nameProc.c_str(),nameProc.length());
+            nameProc.rend();
+            if(cntProc-i>1)
+                fob<<"\n";
         }
         fob.close();
         emit sendMesage("Comand getBL is execute");
@@ -168,9 +176,9 @@ void Widget::update()
 
         //=====send========================
         QString command="view@";
-
+        ui->label->setText(command);
         std::fstream fi("/dev/affl_comm",std::ios_base::out);
-        fi<<command.toStdString();
+        fi.write(command.toStdString().c_str(),command.length());
         fi.close();
         //====resive========================
         int cntProc=0;
@@ -188,6 +196,10 @@ void Widget::update()
         else
         {
             emit sendMesage("Comand view is execute");
+            for(int i=0;i<ui->tableWidget->rowCount();i++)
+            {
+                ui->tableWidget->removeRow(i);
+            }
             ui->tableWidget->setRowCount(cntProc);
             for(int i=0;i<cntProc;i++)
             {
@@ -198,6 +210,7 @@ void Widget::update()
                 ui->tableWidget->setItem(i,1,new QTableWidgetItem(QString(procName)));
             }
         }
+        command.clear();
         fo.close();
         lockSlot=0;
     }
@@ -215,40 +228,52 @@ void Widget::killAsPID()
         else
         {
             //=====send========================
-            QString command="kill@";
+            QString command;
+            command.clear();
+            command="kill@";
             command+=ui->tableWidget->item(ui->tableWidget->currentRow(),1)->text();
             command+="#%";
             command+=ui->tableWidget->item(ui->tableWidget->currentRow(),0)->text();
-
-            std::fstream fi("/dev/affl_comm",std::ios_base::out);
-            fi<<command.toStdString();
-            fi.close();
-
-            //====resive========================
-            char charAnsver[50];
-            QString ansver;
-
-            std::fstream fo("/dev/affl_comm",std::ios_base::in);
-            fo.getline(charAnsver,50);
-            ansver=QString(charAnsver);
-            if(ansver==command)
+            command+="%";
+            ui->label->setText(command);
+            if(ui->tableWidget->item(ui->tableWidget->currentRow(),1)->text() != "affl_GUI")
             {
-                emit sendMesage("Comand killAsPid didn't execute");
-                emit sendStatMod("Disable");
-            }
+                std::fstream fi("/dev/affl_comm",std::ios_base::out);
+                fi.write((command).toStdString().c_str(),command.length());
+                fi.close();
 
-            if(ansver=="0")
-            {
-                emit sendMesage("Comand killAsPid is execute");
-            }
-            if(ansver=="-1")
-            {
-                ui->label_6->setText("Invalid process");
-            }
+                //====resive========================
+                char charAnsver[50];
+                QString ansver;
 
+                std::fstream fo("/dev/affl_comm",std::ios_base::in);
+                fo.getline(charAnsver,50);
+                ansver=QString(charAnsver);
+                fo.close();
+                if(ansver==command)
+                {
+                    emit sendMesage("Comand killAsPid didn't execute");
+                    emit sendStatMod("Disable");
+                }
+
+                if(ansver=="0")
+                {
+                    emit sendMesage("Comand killAsPid is execute");
+                }
+                if(ansver=="-1")
+                {
+                    ui->label_6->setText("Invalid process");
+                }
+
+            }
+            else
+            {
+                emit sendMesage("Cannot kill application of Gods!! :)");
+            }
+            lockSlot=0;
         }
-        lockSlot=0;
     }
+    update();
 }
 
 void Widget::killAsName()
@@ -263,75 +288,110 @@ void Widget::killAsName()
         else
         {
             //=====send========================
-            QString command="kill@";
+            QString command;
+            command.clear();
+            command="kill@";
             command+=ui->tableWidget->item(ui->tableWidget->currentRow(),1)->text();
-            command+="#%-1";
-
-            std::fstream fi("/dev/affl_comm",std::ios_base::out);
-            fi<<command.toStdString();
-            fi.close();
-
-            //====resive========================
-            char charAnsver[50];
-            QString ansver;
-
-            std::fstream fo("/dev/affl_comm",std::ios_base::in);
-            fo.getline(charAnsver,50);
-            ansver=QString(charAnsver);
-            if(ansver==command)
+            command+="#%-1%";
+            ui->label->setText(command);
+            if(ui->tableWidget->item(ui->tableWidget->currentRow(),1)->text() != "affl_GUI")
             {
-                emit sendMesage("Comand killAsName didn't execute");
-                emit sendStatMod("Disable");
-            }
+                std::fstream fi("/dev/affl_comm",std::ios_base::out);
+                //std::fstream fi("./test.txt",std::fstream::out | std::fstream::app);
+                fi.write((command).toStdString().c_str(),command.length());
+                //fi<<"\n";
+                fi.close();
 
-            if(ansver=="0")
-            {
-                emit sendMesage("Comand killAsName is execute");
-            }
-            if(ansver=="-1")
-            {
-                ui->label_6->setText("Invalid process");
-            }
+                //====resive========================
+                char charAnsver[50];
+                QString ansver;
 
+                std::fstream fo("/dev/affl_comm",std::ios_base::in);
+                fo.getline(charAnsver,50);
+                fo.close();
+                ansver=QString(charAnsver);
+                if(ansver==command)
+                {
+                    emit sendMesage("Comand killAsName didn't execute");
+                    emit sendStatMod("Disable");
+                }
+
+                if(ansver=="0")
+                {
+                    emit sendMesage("Comand killAsName is execute");
+                }
+                if(ansver=="-1")
+                {
+                    emit sendMesage("Invalid process");
+
+                }
+            }
+            else
+            {
+                emit sendMesage("Cannot kill application of Gods!! :)");
+            }
         }
         lockSlot=0;
     }
+    update();
 }
+
 
 void Widget::addbl()
 {
     if(lockSlot==0)
     {
         lockSlot=1;
-        //=====send========================
-        QString command="addProc@";
-        std::fstream fi("/dev/affl_command2",std::ios_base::out);
-        fi<<command.toStdString();
-        fi.close();
-        //====resive========================
-        char charAnsver[50];
-        QString ansver;
-
-        std::fstream fo("/dev/affl_command3",std::ios_base::in);
-        fo.getline(charAnsver,50);
-        ansver=QString(charAnsver);
-        if(ansver==command)
+        if(ui->tableWidget->currentColumn()==-1 || ui->tableWidget->currentRow()==-1)
         {
-            ui->label_4->setText("Module: Disable");
-            ui->label_6->setText("Module disable");
-            exist=0;
+            emit sendMesage("Please allocation process");
         }
-
-        if(ansver=="0")
+        else
         {
+            //=====send========================
+            QString command="addProc@";
+            command+=ui->tableWidget->item(ui->tableWidget->currentRow(), 1)->text();
+            command+="#";
+            ui->label->setText(command);
+            if(ui->tableWidget->item(ui->tableWidget->currentRow(),1)->text() != "affl_GUI")
+            {
+                std::fstream fi("/dev/affl_comm",std::ios_base::out);
+                fi.write(command.toStdString().c_str(),command.length());
+                fi.close();
+                //====resive========================
+                std::string charAnsver;
+                QString ansver;
 
-            ui->label_6->setText("WellDone");
-            exist=1;
+                std::fstream fo("/dev/affl_comm",std::ios_base::in);
+                fo>>charAnsver;
+                fo.close();
+                ansver=QString(charAnsver.c_str());
+
+                if(ansver==command)
+                {
+                    emit sendMesage("Comand killAsName didn't execute");
+                    emit sendStatMod("Disable");
+                }
+
+                if(ansver=="-1")
+                {
+                    emit sendMesage("Invalid process");
+                }
+                else if(ansver=="0")
+                {
+                    emit sendMesage("Comand killAsName is execute");
+                    ui->tableWidget_2->setRowCount(ui->tableWidget_2->rowCount() + 1);
+                    ui->tableWidget_2->setItem(ui->tableWidget_2->rowCount()-1,0,new QTableWidgetItem(ui->tableWidget->item(ui->tableWidget->currentRow(), 1)->text()));
+                }
+            }
+            else
+            {
+                emit sendMesage("Cannot kill application of Gods!! :)");
+            }
         }
-
         lockSlot=0;
     }
-
+    update();
 }
 
 void Widget::rmbl()
@@ -339,9 +399,96 @@ void Widget::rmbl()
     if(lockSlot==0)
     {
         lockSlot=1;
+        if(ui->tableWidget_2->currentColumn()==-1 || ui->tableWidget_2->currentRow()==-1)
+        {
+            emit sendMesage("Please allocation process in black list.");
+        }
+        else
+        {
+            //=====send========================
+            QString command="rmProc@";
+            command+=ui->tableWidget_2->item(ui->tableWidget_2->currentRow(), 0)->text();
+            command+="#";
+            ui->label->setText(command);
+            std::fstream fi("/dev/affl_comm",std::ios_base::out);
+            fi.write(command.toStdString().c_str(),command.length());
+            fi.close();
+            //====resive========================
+            std::string charAnsver;
+            QString ansver;
 
+            std::fstream fo("/dev/affl_comm",std::ios_base::in);
+            fo>>charAnsver;
+            fo.close();
+            ansver=QString(charAnsver.c_str());
 
+            if(ansver==command)
+            {
+                emit sendMesage("Comand rmProc didn't execute");
+                emit sendStatMod("Disable");
+            }
 
+            if(ansver=="-1")
+            {
+
+                emit sendMesage("Cannot find process name in black list");
+            }
+            else if(ansver=="0")
+            {
+
+                emit sendMesage("Comand rmProc is execute");
+                ui->tableWidget_2->removeRow(ui->tableWidget_2->currentRow());
+            }
+        }
+        lockSlot=0;
+    }
+    update();
+}
+
+void Widget::getInfo(int row, int collom)
+{
+    if(lockSlot==0)
+    {
+        lockSlot=1;
+
+        //=====send========================
+        QString command;
+        command.clear();
+        command="getInfo@";
+        command+="%";
+        command+=ui->tableWidget->item(row, 0)->text();
+        command+="%";
+        ui->label->setText(command);
+        std::fstream fi("/dev/affl_comm",std::ios_base::out);
+        fi<<(command).toStdString();
+        fi.close();
+        fi.open("./test.txt",std::ios_base::out);
+        fi<<(command).toStdString();
+        fi.close();
+        QString ansver;
+
+        std::fstream fo("/dev/affl_comm",std::ios_base::in);
+        std::string stdAnsver((std::istreambuf_iterator<char>(fo)), std::istreambuf_iterator<char>());//Пишем из файла в
+        ansver=QString(stdAnsver.c_str());
+        fo.close();
+        if(ansver==command)
+        {
+            emit sendMesage("Comand getInfo didn't execute");
+            emit sendStatMod("Disable");
+        }
+
+        if(ansver=="-1")
+        {
+            ansver.clear();
+            ui->textBrowser->setText(ansver);
+            ui->label_6->setText("Invalid process");
+        }
+        else
+        {
+            ui->textBrowser->setText(ansver);
+        }
+        ansver.clear();
+        stdAnsver.clear();
         lockSlot=0;
     }
 }
@@ -352,7 +499,7 @@ void Widget::modExist()
     QString command="exist@";
 
     std::fstream fi("/dev/affl_command4",std::ios_base::out);
-    fi<<command.toStdString();
+    fi.write(command.toStdString().c_str(),command.length());
     fi.close();
 
     //====resive========================
