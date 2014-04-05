@@ -147,19 +147,25 @@ int affl_get_proc_PID(const char* input, int* PID)
 	char strPID[10];
 	int tempPid = 0;
 	struct task_struct* task = NULL;
-	char* temp = NULL;
+	char* begin = NULL;
+	char* end = NULL;
+	int size = 0;
 	int i = 0;
 	memset(strPID, 0, 10);
-	if ((temp = strchr(input, '%')))
+	if ((begin = strchr(input, '%')) && (end = strchr(begin+1, '%')))
 	{
-		temp++;
-
-			for(i = 0; (temp[i] >= 48 && temp[i] <= 57) || temp[i] == '-'; i++ )
-			{
-				strPID[i] = temp[i];
-			}
-		//printk("\tstrPID = %s\n", strPID);
+		begin++;
+		end--;
+		size = end - begin + 1;
+		
+		for(i = 0; i < size; i++ )
+		{
+			strPID[i] = begin[i];
+		}
+		strPID[size] = 0;
+		printk("\tstrPID = %s\n", strPID);
 		kstrtoint((strPID), 10, &tempPid);
+		printk("\tPID = %d\n", tempPid);
 	}
 	else
 	{

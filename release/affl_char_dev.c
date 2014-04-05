@@ -38,6 +38,7 @@ ssize_t affl_read(struct file *f, char __user *buf, size_t len, loff_t *off)
 	}
 	else
 	{
+		//memset(affl_kernel_buf+1, 0, 254);
 		//printk(KERN_INFO "affl_Driver: affl_read()\n");
 		if (copy_to_user(buf, affl_kernel_buf, affl_size) != 0)
 		{
