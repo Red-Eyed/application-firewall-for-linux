@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>640</width>
-    <height>609</height>
+    <height>711</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -154,7 +154,7 @@
     </rect>
    </property>
    <property name="rowCount">
-    <number>6</number>
+    <number>0</number>
    </property>
    <property name="columnCount">
     <number>1</number>
@@ -162,12 +162,6 @@
    <attribute name="horizontalHeaderStretchLastSection">
     <bool>true</bool>
    </attribute>
-   <row/>
-   <row/>
-   <row/>
-   <row/>
-   <row/>
-   <row/>
    <column/>
   </widget>
   <widget class="QPushButton" name="pushButton_6">
@@ -331,6 +325,19 @@
      <string>WellDone</string>
     </property>
    </widget>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>600</y>
+     <width>591</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>TextLabel</string>
+   </property>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

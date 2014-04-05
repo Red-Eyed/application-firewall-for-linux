@@ -32,6 +32,7 @@ public slots:
     void update();
     void killAsPID();
     void killAsName();
+    void getInfo(int row, int collom);
     void addbl();
     void rmbl();
     void modExist();
