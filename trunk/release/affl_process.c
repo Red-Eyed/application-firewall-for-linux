@@ -135,6 +135,7 @@ int affl_get_proc_name(const char* input, char** proc_name)
 		*proc_name = vmalloc(end - begin+1);
 		
 		memcpy(*proc_name, begin, (size_t) (end - begin));
+		(*proc_name)[end - begin]=0;
 		return (0);
 	}
 
