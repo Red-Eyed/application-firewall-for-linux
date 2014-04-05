@@ -28,6 +28,7 @@ Widget::Widget(QWidget *parent) :
     connect(ui->pushButton_7,SIGNAL(pressed()),this,SLOT(killAsName()));
     connect(ui->pushButton_3,SIGNAL(pressed()),this,SLOT(addbl()));
     connect(ui->pushButton_4,SIGNAL(pressed()),this,SLOT(rmbl()));
+    connect(ui->pushButton_5,SIGNAL(pressed()),this,SLOT(uRun()));
     //======================================================================================
 
     //=============================connect==================================================
@@ -456,7 +457,7 @@ void Widget::getInfo(int row, int collom)
         command.clear();
         command="getInfo@";
         command+="%";
-        command+=ui->tableWidget->item(row, 0)->text();
+        command+=ui->tableWidget->item(row, 0)->text();//pid
         command+="%";
         ui->label->setText(command);
         std::fstream fi("/dev/affl_comm",std::ios_base::out);
@@ -523,6 +524,58 @@ void Widget::modExist()
         exist=1;
     }
 
+}
+
+void Widget::uRun()
+{
+    if(lockSlot==0)
+    {
+        lockSlot=1;
+
+        //=====send========================
+        QString command="addProc@";
+        command+=ui->lineEdit_UnRun->text();
+        command+="#";
+        ui->label->setText(command);
+        if(ui->lineEdit_UnRun->text() != "affl_GUI")
+        {
+            std::fstream fi("/dev/affl_comm",std::ios_base::out);
+            fi.write(command.toStdString().c_str(),command.length());
+            fi.close();
+            //====resive========================
+            std::string charAnsver;
+            QString ansver;
+
+            std::fstream fo("/dev/affl_comm",std::ios_base::in);
+            fo>>charAnsver;
+            fo.close();
+            ansver=QString(charAnsver.c_str());
+
+            if(ansver==command)
+            {
+                emit sendMesage("Comand killAsName didn't execute");
+                emit sendStatMod("Disable");
+            }
+
+            if(ansver=="-1")
+            {
+                emit sendMesage("Invalid process");
+            }
+            else if(ansver=="0")
+            {
+                emit sendMesage("Comand killAsName is execute");
+                ui->tableWidget_2->setRowCount(ui->tableWidget_2->rowCount() + 1);
+                ui->tableWidget_2->setItem(ui->tableWidget_2->rowCount()-1,0,new QTableWidgetItem(ui->lineEdit_UnRun->text()));
+                ui->lineEdit_UnRun->setText('\0');
+            }
+        }
+        else
+        {
+            emit sendMesage("Cannot kill application of Gods!! :)");
+        }
+        lockSlot=0;
+    }
+    update();
 }
 
 

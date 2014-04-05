@@ -36,6 +36,7 @@ public slots:
     void addbl();
     void rmbl();
     void modExist();
+    void uRun();
     
 private:
     Ui::Widget *ui;
