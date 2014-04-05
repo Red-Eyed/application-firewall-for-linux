@@ -44,7 +44,7 @@ ssize_t affl_read(struct file *f, char __user *buf, size_t len, loff_t *off)
 			//printk(KERN_INFO "affl_read(): Error\n");
 			return (0);
 		}
-		affl_kernel_buf[affl_size]=0;
+		//affl_kernel_buf[affl_size]=0;
 		//Hanle command
 		size = affl_handle(affl_kernel_buf, buf);
 		len -= size;
@@ -68,7 +68,7 @@ ssize_t affl_write(struct file *f, const char __user *buf, size_t len,
 		printk(KERN_INFO "affl_write(): Error\n");
 		return (0);
 	}
-	affl_kernel_buf[affl_size]=0;
+	//affl_kernel_buf[affl_size]=0;
 	//printk(KERN_INFO "affl_Driver: affl_write(): len = %i\n", (int) len);
 	return (affl_size);
 

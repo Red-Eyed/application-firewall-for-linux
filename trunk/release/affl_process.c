@@ -126,16 +126,18 @@ int affl_get_proc_name(const char* input, char** proc_name)
 {
 	char* begin = NULL;
 	char* end = NULL;
+	
 	if (strchr(input, '@') && strrchr(input, '#'))
 	{
 		begin = strchr(input, '@');
 		end = strchr(input, '#');
 		begin++;
 		*proc_name = vmalloc(end - begin+1);
-		*proc_name[end - begin]=0;
+		
 		memcpy(*proc_name, begin, (size_t) (end - begin));
 		return (0);
 	}
+
 	return (-1);
 }
 
@@ -350,7 +352,7 @@ int affl_kill_process(const char* name, int PID)
 		for (i = 0; i < affl_cnt_process_mas; i++)
 		{
 			//if (strstr(affl_list_process_mas[i].process_name, name))
-			if (strcmp(affl_list_process_mas[i].process_name, name))
+			if (!strcmp(affl_list_process_mas[i].process_name, name))
 			{
 				affl_sys_kill(affl_list_process_mas[i].PID, 9);
 				flag++;
