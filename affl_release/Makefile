@@ -1,7 +1,7 @@
 NAME_FILE1 := affl_main
 NAME_FILE2 := affl_process
 NAME_FILE3 := affl_char_dev
-TARGET_MODULE := affl_mod1
+TARGET_MODULE := affl_mod11
 # If we are running by kernel building system
 ifneq ($(KERNELRELEASE),)
 	$(TARGET_MODULE)-objs := $(NAME_FILE1).o $(NAME_FILE2).o $(NAME_FILE3).o
@@ -12,7 +12,7 @@ else
 	BUILDSYSTEM_DIR:=/lib/modules/$(shell uname -r)/build
 	PWD:=$(shell pwd)
 
-all : 
+all :
 # run kernel build system to make module
 	$(MAKE) -C $(BUILDSYSTEM_DIR) M=$(PWD) modules
 	rm *.o *.mod.c *.order *.symvers 

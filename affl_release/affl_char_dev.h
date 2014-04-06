@@ -30,7 +30,7 @@ ssize_t affl_write(struct file *f, const char __user *buf, size_t len, loff_t *o
 int affl_init_char_dev(const char* file_name, const char* device_name);
 void affl_clean_char_dev(void);
 
-void affl_check_file(char* filename);
+void affl_check_file(const char* filename);
 
 
 extern dev_t first;                     // Global variable for the first device number
