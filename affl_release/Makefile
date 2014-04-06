@@ -1,7 +1,7 @@
 NAME_FILE1 := affl_main
 NAME_FILE2 := affl_process
 NAME_FILE3 := affl_char_dev
-TARGET_MODULE := affl_mod
+TARGET_MODULE := affl_mod1
 # If we are running by kernel building system
 ifneq ($(KERNELRELEASE),)
 	$(TARGET_MODULE)-objs := $(NAME_FILE1).o $(NAME_FILE2).o $(NAME_FILE3).o

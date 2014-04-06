@@ -1,36 +1,36 @@
 #include "affl_char_dev.h"
 
-int affl_flag = 0;
-
+int affl_flag = 1;
 
 struct cdev affl_c_dev;
 dev_t affl_first;
 struct class *affl_cl;
+int affl_Device_Open = 0;
 
 struct file_operations affl_fops =
-{
-    .owner = THIS_MODULE,
-    .open = affl_open,
-    .release = affl_close,
-    .read =	affl_read,
-    .write = affl_write
-};
+{ .owner = THIS_MODULE, .open = affl_open, .release = affl_close, .read =
+		affl_read, .write = affl_write };
 
 char affl_kernel_buf[255];
 int affl_size = 0;
 
 int affl_open(struct inode *i, struct file *f)
 {
-	//printk(KERN_INFO "affl_Driver: affl_open()\n");
+	if (affl_Device_Open)
+		return -EBUSY;
+	affl_Device_Open++;
+	try_module_get(THIS_MODULE );
 	return (0);
 }
 int affl_close(struct inode *i, struct file *f)
 {
-	//printk(KERN_INFO "affl_Driver: affl_close()\n");
+	affl_Device_Open--;
+	module_put(THIS_MODULE );
 	return (0);
 }
 ssize_t affl_read(struct file *f, char __user *buf, size_t len, loff_t *off)
 {
+
 	unsigned int size = 0;
 	if (affl_flag == 0)
 	{
@@ -38,13 +38,14 @@ ssize_t affl_read(struct file *f, char __user *buf, size_t len, loff_t *off)
 	}
 	else
 	{
+		//memset(affl_kernel_buf+1, 0, 254);
 		//printk(KERN_INFO "affl_Driver: affl_read()\n");
 		if (copy_to_user(buf, affl_kernel_buf, affl_size) != 0)
 		{
 			//printk(KERN_INFO "affl_read(): Error\n");
 			return (0);
 		}
-
+		//affl_kernel_buf[affl_size]=0;
 		//Hanle command
 		size = affl_handle(affl_kernel_buf, buf);
 		len -= size;
@@ -54,6 +55,8 @@ ssize_t affl_read(struct file *f, char __user *buf, size_t len, loff_t *off)
 		affl_flag = 0;
 		return (size);
 	}
+
+	return (0);
 }
 ssize_t affl_write(struct file *f, const char __user *buf, size_t len,
 		loff_t *off)
@@ -66,12 +69,14 @@ ssize_t affl_write(struct file *f, const char __user *buf, size_t len,
 		printk(KERN_INFO "affl_write(): Error\n");
 		return (0);
 	}
-
+	//affl_kernel_buf[affl_size]=0;
 	//printk(KERN_INFO "affl_Driver: affl_write(): len = %i\n", (int) len);
 	return (affl_size);
+
+	return (0);
 }
 asmlinkage long (*affl_sys_removexattr)(const char __user *path,
-				const char __user *name);
+		const char __user *name);
 
 void affl_check_file(char* filename)
 {
