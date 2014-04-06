@@ -9,18 +9,20 @@ struct affl_list_process
 	int PID;
 };
 
-static void **taddr = NULL;
+//static void **taddr = NULL;
+struct affl_list_process affl_list_process_mas[300];
+int affl_cnt_process_mas = 0;
+
+struct affl_list_process affl_black_list[100];
+static int affl_cnt_bl = 0;
+
 
 #define affl_sys_call "sys_execve"
 #define affl_new_sys_call new_sys_execve
 #define affl_old_sys_call old_sys_execve
 #define affl__NR_call __NR_execve
 
-struct affl_list_process affl_list_process_mas[300];
-int affl_cnt_process_mas = 0;
 
-struct affl_list_process affl_black_list[100];
-static int affl_cnt_bl = 0;
 
 unsigned int affl_handle(const char* input, char* user_buf)
 {
@@ -243,7 +245,6 @@ int affl_get_info_for_process(int pid, char* user_buf)
 		memset(buf, 0, 300);
 
 		affl_get_task();
-
 		for_each_process(task)
 		{
 			if (task->pid == pid)
@@ -576,7 +577,6 @@ asmlinkage long affl_new_sys_call(const char __user *filename,
 	}
 }
 
-EXPORT_SYMBOL(affl_new_sys_call);
 
 int affl_get_black_list(char* user_buf)
 {
@@ -606,74 +606,78 @@ void affl_add_list_process_mass(const char* proc_name, int PID)
 	affl_list_process_mas[affl_cnt_process_mas].PID = PID;
 	affl_cnt_process_mas++;
 }
-long size;
+//long size;
 int affl_init_process(void)
 {
-	size = 0;
+	printk("affl_init_process(): begin\n");
+	//size = 0;
 	affl_sys_kill = find_sym("sys_kill");
 	affl_sys_readlink = find_sym("sys_readlink");
-
-	//init chek run process
-#ifdef affl_x32
-	void *waddr;
-	size = affl__NR_call;
-	if ((taddr = find_sym("sys_call_table")) != NULL )
-	{
-		printk("sys_call_table = %p\n", taddr);
-	}
-	else
-	{
-		printk("! sys_call_table NO_detekted\n");
-		return (-EINVAL);
-	}
-	affl_old_sys_call = (void*) taddr[size];
-	printk("%d[size] = %p\n", size, affl_old_sys_call);
-	if ((waddr = find_sym(affl_sys_call)) != NULL )
-	{
-		printk("sys_call = %p\n", waddr);
-	}
-	else
-	{
-		printk("! sys_call NO_detekted\n");
-		return (-EINVAL);
-	}
-	if (affl_old_sys_call != waddr)
-	{
-		printk("NEPONYATNO\n");
-		return (-EINVAL);
-	}
-	printk("new sys_call = %p\n", &affl_new_sys_call);
-	show_cr0();
-	rw_enable();
-	taddr[size] = affl_new_sys_call;
-	show_cr0();
-	rw_disable();
-	show_cr0();
-	affl_old_sys_call = find_sym(affl_sys_call);
-#else
-	taddr = find_sym("sys_call_table");
-	size = find_sym(affl_sys_call) - find_sym("sys_call_table");
-	if(size < 0)
-		size *= -1;
-	else if (size == 0)
-	{
-		printk("size == 0\n");
-		return (-1);
-	}
-	printk("size = %li\n", size);
-	affl_old_sys_call = taddr[size];
-	rw_enable();
-	taddr[size] = affl_new_sys_call;
-	rw_disable()
-#endif
+//	EXPORT_SYMBOL(affl_new_sys_call);
+//	//init chek run process
+//#ifdef affl_x32
+//	void *waddr;
+//	size = affl__NR_call;
+//	if ((taddr = find_sym("sys_call_table")) != NULL )
+//	{
+//		printk("sys_call_table = %p\n", taddr);
+//	}
+//	else
+//	{
+//		printk("! sys_call_table NO_detekted\n");
+//		return (-EINVAL);
+//	}
+//	affl_old_sys_call = (void*) taddr[size];
+//	printk("%d[size] = %p\n", size, affl_old_sys_call);
+//	if ((waddr = find_sym(affl_sys_call)) != NULL )
+//	{
+//		printk("sys_call = %p\n", waddr);
+//	}
+//	else
+//	{
+//		printk("! sys_call NO_detekted\n");
+//		return (-EINVAL);
+//	}
+//	if (affl_old_sys_call != waddr)
+//	{
+//		printk("NEPONYATNO\n");
+//		return (-EINVAL);
+//	}
+//	printk("new sys_call = %p\n", &affl_new_sys_call);
+//	show_cr0();
+//	rw_enable();
+//	taddr[size] = affl_new_sys_call;
+//	show_cr0();
+//	rw_disable();
+//	show_cr0();
+//	affl_old_sys_call = find_sym(affl_sys_call);
+//#else
+//	taddr = find_sym("sys_call_table");
+//	size = find_sym(affl_sys_call) - find_sym("sys_call_table");
+//	if(size < 0)
+//		size *= -1;
+//	else if (size == 0)
+//	{
+//		printk("size == 0\n");
+//		return (-1);
+//	}
+//	printk("size = %li\n", size);
+//	rw_enable();
+//	taddr[size] = affl_new_sys_call;
+//	rw_disable()
+//	affl_old_sys_call = find_sym(affl_sys_call);
+//#endif
+	printk("affl_init_process(): end\n");
 	return (0);
 }
 void affl_clean_process(void)
 {
-	printk("sys_call(unload) = %p\n", (void*) taddr[size]);
-	rw_enable();
-	taddr[size] = affl_old_sys_call;
-	rw_disable();
+	printk("affl_clean_process(): begin\n");
+//	printk("sys_call(unload) = %p\n", (void*) taddr[size]);
+//	rw_enable();
+//	taddr[size] = affl_old_sys_call;
+//	rw_disable();
+	printk("affl_clean_process(): end\n");
 	return;
 }
 #endif /* AFFL_PROCESS_C_ */
